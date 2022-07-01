@@ -26,12 +26,18 @@ class FilmControllerTest {
     }
 
     @Test
-    @DisplayName("название пустое")
+    @DisplayName("название фильма пустое (null)")
     void validateNameNullTest() {
         film.setName(null);
         assertThrows(ValidationException.class, () -> controller.validateFilm(film));
     }
 
+    @Test
+    @DisplayName("название фильма пустое")
+    void validateNameTest() {
+        film.setName("");
+        assertThrows(ValidationException.class, () -> controller.validateFilm(film));
+    }
     @Test
     @DisplayName("описание больше 200 символов")
     void validateDescriptionMore200Test() {

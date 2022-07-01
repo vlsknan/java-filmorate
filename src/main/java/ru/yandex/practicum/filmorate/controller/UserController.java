@@ -12,7 +12,8 @@ import java.util.*;
 @RequestMapping("/users")
 @Slf4j
 public class UserController {
-    private final Map<String, User> users = new HashMap<>();
+    private final Map<Integer, User> users = new HashMap<>();
+    private int id = 0;
 
     @GetMapping
     public Collection<User> getUsers() {
@@ -23,11 +24,12 @@ public class UserController {
     @PostMapping
     public User createUser(@RequestBody User user) throws ValidationException {
         validateUser(user);
-        if (users.containsKey(user.getEmail())) {
+        if (users.containsKey(user.getId())) {
             throw new ValidationException("Пользователь с электронной почтой " +
                     user.getEmail() + " уже зарегистрирован.");
         } else {
-            users.put(user.getEmail(), user);
+            user.setId(++id);
+            users.put(user.getId(), user);
             log.info("Пользователь с адресом электронной почты {} создан", user.getEmail());
         }
         return user;
@@ -36,10 +38,10 @@ public class UserController {
     @PutMapping
     public User updateUser(@RequestBody User user) throws ValidationException {
         validateUser(user);
-        if (!users.containsKey(user.getEmail())) {
+        if (!users.containsKey(user.getId())) {
             createUser(user);
         } else {
-            users.put(user.getEmail(), user);
+            users.put(user.getId(), user);
             log.info("Пользователь с адресом электронной почты {} обновлен", user.getEmail());
         }
         return user;

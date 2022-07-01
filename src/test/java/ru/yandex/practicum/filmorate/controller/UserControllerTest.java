@@ -40,16 +40,37 @@ class UserControllerTest {
     }
 
     @Test
+    @DisplayName("имя пустое (null)")
+    void validateNameNullTest() throws ValidationException {
+        user.setName(null);
+        controller.validateUser(user);
+        assertEquals(user.getLogin(), user.getName());
+    }
+    @Test
     @DisplayName("почта пустая")
-    void validateEmailTest() {
+    void validateEmailNullTest() {
         user.setEmail(null);
         assertThrows(ValidationException.class, () -> controller.validateUser(user));
     }
 
     @Test
+    @DisplayName("почта не содержит @")
+    void validateEmailTest() {
+        user.setEmail("afgs.yan.ru");
+        assertThrows(ValidationException.class, () -> controller.validateUser(user));
+    }
+
+    @Test
     @DisplayName("логин пустой")
-    void validateLoginTest() {
+    void validateLoginNullTest() {
         user.setLogin(null);
+        assertThrows(ValidationException.class, () -> controller.validateUser(user));
+    }
+
+    @Test
+    @DisplayName("логин содержит пробел")
+    void validateLoginTest() {
+        user.setLogin("Asdf Bahk");
         assertThrows(ValidationException.class, () -> controller.validateUser(user));
     }
 

@@ -15,7 +15,7 @@ import java.util.Map;
 @Slf4j
 public class FilmController {
     private static final LocalDate REFERENCE_DATE = LocalDate.of(1895,12,28);
-    private final Map<String, Film> films = new HashMap<>();
+    private final Map<Integer, Film> films = new HashMap<>();
 
     @GetMapping
     public Collection<Film> getFilms() {
@@ -26,11 +26,13 @@ public class FilmController {
     @PostMapping
     public Film createFilm(@RequestBody Film film) throws ValidationException {
         validateFilm(film);
-        if (films.containsKey(film.getName())) {
+        if (films.containsKey(film.getId())) {
             throw new ValidationException("Фильм \"" +
                     film.getName() + "\" уже есть в списке.");
         } else {
-            films.put(film.getName(), film);
+            int id = film.getId();
+            film.setId(++id);
+            films.put(film.getId(), film);
             log.info("Фильм {} создан.", film.getName());
         }
         return film;
@@ -39,10 +41,10 @@ public class FilmController {
     @PutMapping
     public Film updateFilm(@RequestBody Film film) throws ValidationException {
         validateFilm(film);
-        if (!films.containsKey(film.getName())) {
+        if (!films.containsKey(film.getId())) {
             createFilm(film);
         } else {
-            films.put(film.getName(), film);
+            films.put(film.getId(), film);
             log.info("Фильм {} обновлен.", film.getName());
         }
         return film;
