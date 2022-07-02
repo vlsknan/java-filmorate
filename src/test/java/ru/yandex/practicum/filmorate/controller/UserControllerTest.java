@@ -11,11 +11,11 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.*;
 
 class UserControllerTest {
-    User user;
-    UserController controller;
+    private User user;
+    private UserController controller;
 
     @BeforeEach
-    void beforeEach() {
+    protected void beforeEach() {
         controller = new UserController();
         user = new User();
         user.setLogin("dolore");
@@ -26,14 +26,15 @@ class UserControllerTest {
 
     @Test
     @DisplayName("id отрицательный")
-    void validateIdTest() {
+    protected void validateIdTest() {
         user.setId(-1);
-        assertThrows(ValidationException.class, () -> controller.validateUser(user));
+        Exception ex = assertThrows(ValidationException.class, () -> controller.validateUser(user));
+        assertEquals("Id не может быть отрицательным.", ex.getMessage());
     }
 
     @Test
     @DisplayName("имя пустое")
-    void validateNameTest() throws ValidationException {
+    protected void validateNameTest() throws ValidationException {
         user.setName("");
         controller.validateUser(user);
         assertEquals(user.getLogin(), user.getName());
@@ -41,43 +42,48 @@ class UserControllerTest {
 
     @Test
     @DisplayName("имя пустое (null)")
-    void validateNameNullTest() throws ValidationException {
+    protected void validateNameNullTest() throws ValidationException {
         user.setName(null);
         controller.validateUser(user);
         assertEquals(user.getLogin(), user.getName());
     }
     @Test
     @DisplayName("почта пустая")
-    void validateEmailNullTest() {
+    protected void validateEmailNullTest() {
         user.setEmail(null);
-        assertThrows(ValidationException.class, () -> controller.validateUser(user));
+        Exception ex = assertThrows(ValidationException.class, () -> controller.validateUser(user));
+        assertEquals("Проверьте адрес электронной почты.", ex.getMessage());
     }
 
     @Test
     @DisplayName("почта не содержит @")
-    void validateEmailTest() {
+    protected void validateEmailTest() {
         user.setEmail("afgs.yan.ru");
-        assertThrows(ValidationException.class, () -> controller.validateUser(user));
+        Exception ex = assertThrows(ValidationException.class, () -> controller.validateUser(user));
+        assertEquals("Проверьте адрес электронной почты.", ex.getMessage());;
     }
 
     @Test
     @DisplayName("логин пустой")
-    void validateLoginNullTest() {
+    protected void validateLoginNullTest() {
         user.setLogin(null);
-        assertThrows(ValidationException.class, () -> controller.validateUser(user));
+        Exception ex = assertThrows(ValidationException.class, () -> controller.validateUser(user));
+        assertEquals("Логин не может содержать пробелы или быть пустым", ex.getMessage());
     }
 
     @Test
     @DisplayName("логин содержит пробел")
-    void validateLoginTest() {
+    protected void validateLoginTest() {
         user.setLogin("Asdf Bahk");
-        assertThrows(ValidationException.class, () -> controller.validateUser(user));
+        Exception ex = assertThrows(ValidationException.class, () -> controller.validateUser(user));
+        assertEquals("Логин не может содержать пробелы или быть пустым", ex.getMessage());
     }
 
     @Test
     @DisplayName("день рождение в будущем")
-    void validateBirthdayTest() {
+    protected void validateBirthdayTest() {
         user.setBirthday(LocalDate.of(2024, 7, 14));
-        assertThrows(ValidationException.class, () -> controller.validateUser(user));
+        Exception ex = assertThrows(ValidationException.class, () -> controller.validateUser(user));
+        assertEquals("Дата рождения не может быть в будущем.", ex.getMessage());
     }
 }

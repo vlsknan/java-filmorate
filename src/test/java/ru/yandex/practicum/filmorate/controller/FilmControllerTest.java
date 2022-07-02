@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,11 +11,11 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.*;
 
 class FilmControllerTest {
-    Film film;
-    FilmController controller;
+    private Film film;
+    private FilmController controller;
 
     @BeforeEach
-    void beforeEach() {
+    protected void beforeEach() {
         controller = new FilmController();
         film = new Film();
         film.setName("nisi eiusmod");
@@ -27,46 +26,52 @@ class FilmControllerTest {
 
     @Test
     @DisplayName("название фильма пустое (null)")
-    void validateNameNullTest() {
+    protected void validateNameNullTest() {
         film.setName(null);
-        assertThrows(ValidationException.class, () -> controller.validateFilm(film));
+        Exception ex = assertThrows(ValidationException.class, () -> controller.validateFilm(film));
+        assertEquals("Название фильма не указано.", ex.getMessage());
     }
 
     @Test
     @DisplayName("название фильма пустое")
-    void validateNameTest() {
+    protected void validateNameTest() {
         film.setName("");
-        assertThrows(ValidationException.class, () -> controller.validateFilm(film));
+        Exception ex = assertThrows(ValidationException.class, () -> controller.validateFilm(film));
+        assertEquals("Название фильма не указано.", ex.getMessage());
     }
     @Test
     @DisplayName("описание больше 200 символов")
-    void validateDescriptionMore200Test() {
+    protected void validateDescriptionMore200Test() {
         film.setDescription("американский комедийный боевик режиссёра и сценариста Роусона Маршалла Тёрбера. " +
                 "Главные роли исполнили Дуэйн Джонсон, Райан Рейнольдс и Галь Гадот. Это третий совместный проект " +
                 "Тёрбера и Джонсона после картин «Полтора шпиона» и «Небоскрёб», " +
                 "третья совместная работа Гадот и Джонсона после фильмов «Форсаж 5» и " +
                 "«Форсаж 6» и вторая коллаборация между Джонсоном и Рейнольдсом после фильма «Форсаж: Хоббс и Шоу».");
-        assertThrows(ValidationException.class, () -> controller.validateFilm(film));
+        Exception ex = assertThrows(ValidationException.class, () -> controller.validateFilm(film));
+        assertEquals("Описание фильма не должно превышать 200 символов.", ex.getMessage());
     }
 
     @Test
     @DisplayName("id отрицательный")
-    void validateIdTest() {
+    protected void validateIdTest() {
         film.setId(-1);
-        assertThrows(ValidationException.class, () -> controller.validateFilm(film));
+        Exception ex = assertThrows(ValidationException.class, () -> controller.validateFilm(film));
+        assertEquals("Id не может быть отрицательным.", ex.getMessage());
     }
 
     @Test
     @DisplayName("продолжительность отрицательная")
-    void validateDurationTest() {
+    protected void validateDurationTest() {
         film.setDuration(-10);
-        assertThrows(ValidationException.class, () -> controller.validateFilm(film));
+        Exception ex = assertThrows(ValidationException.class, () -> controller.validateFilm(film));
+        assertEquals("Продолжительность фильма не может быть отрицательной.", ex.getMessage());
     }
 
     @Test
     @DisplayName("релиз раньше 20 декабря 1895 года")
-    void validateReleaseTest() {
+    protected void validateReleaseTest() {
         film.setReleaseDate(LocalDate.of(1745, 11,1));
-        assertThrows(ValidationException.class, () -> controller.validateFilm(film));
+        Exception exception = assertThrows(ValidationException.class, () -> controller.validateFilm(film));
+        assertEquals("Дата релиза не может быть раньше 28 декабря 1895 года.", exception.getMessage());
     }
 }
