@@ -9,5 +9,6 @@ public interface FilmStorage {
     Collection<Film> getFilms(); //получить список всех фильмов
     Film createFilm(Film film) throws ValidationException; //создать фильм
     Film updateFilm(Film film) throws ValidationException; //обновить данные о фильме
-    Film getFilmById(long id);
+    Film getFilmById(long id); //получить фильм по id
+    boolean contains(long id);
 }

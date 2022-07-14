@@ -16,4 +16,9 @@ public class Film {
     private int duration;
     @JsonIgnore
     private Set<User> like = new HashSet<>();
+
+    @Override
+    public int hashCode() {
+        return (int) (id ^ (id >>> 32));
+    }
 }

@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
@@ -17,8 +17,8 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class FilmService {
-    private FilmStorage filmStorage;
-    private UserStorage userStorage;
+    private final FilmStorage filmStorage;
+    private final UserStorage userStorage;
     private static final LocalDate REFERENCE_DATE = LocalDate.of(1895,12,28);
 
     @Autowired
@@ -33,10 +33,8 @@ public class FilmService {
     }
 
     //получить фильм по id
-    public Film getFilmById(long filmId) throws IncorrectParameterException {
-        if (filmId < 0) {
-            throw new IncorrectParameterException("id фильма не может быть отрицательным.");
-        }
+    public Film getFilmById(long filmId) {
+        checkFilm(filmId);
         return filmStorage.getFilmById(filmId);
     }
 
@@ -48,32 +46,33 @@ public class FilmService {
 
     //обновить данные о фильме
     public Film updateFilm(Film film) throws ValidationException {
+        checkFilm(film.getId());
         validateFilm(film);
         return filmStorage.updateFilm(film);
     }
 
     //добавить фильму лайк
-    public void addLike(long filmId, long userId) throws IncorrectParameterException {
+    public void addLike(long filmId, long userId) {
         Film film = getFilmById(filmId);
         User user = userStorage.getUserById(userId);
         film.getLike().add(user);
     }
 
     //удалить у фильма лайк
-    public void deleteLike(long filmId, long userId) throws IncorrectParameterException {
+    public void deleteLike(long filmId, long userId) {
+        checkFilm(filmId);
         Film film = getFilmById(filmId);
         User user = userStorage.getUserById(userId);
+        if (user == null) {
+            throw new NotFoundException("Пользователь не найден");
+        }
         film.getLike().remove(user);
     }
 
     //получить список популярных фильмов (из первых count фильмов по количеству лайков)
     public List<Film> getListPopularFilm(long count) {
         return filmStorage.getFilms().stream()
-                //.sorted(Comparator.comparing(Film::getLike, Comparator.reverseOrder()))
-                .sorted(Collections.reverseOrder())
-                // .map(Film::getLike)
-                //.sorted(Comparator.comparing(Film::getLike).reverseOrder())
-                //.sorted(Comparator.reverseOrder())
+                .sorted(Comparator.comparing(film -> film.getLike().size(), Comparator.reverseOrder()))
                 .limit(count)
                 .collect(Collectors.toList());
     }
@@ -95,9 +94,11 @@ public class FilmService {
             log.debug("Продолжительность фильма отрицательная");
             throw new ValidationException("Продолжительность фильма не может быть отрицательной.");
         }
-        if (film.getId() < 0) {
-            log.debug("id отрицателен");
-            throw new ValidationException("Id не может быть отрицательным.");
+    }
+
+    private void checkFilm(long filmId) {
+        if (!filmStorage.contains(filmId)) {
+            throw new NotFoundException(String.format("Фильм с id=%s не найден", filmId));
         }
     }
 }

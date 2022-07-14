@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -14,7 +14,7 @@ import java.util.*;
 @Service
 @Slf4j
 public class UserService {
-    private UserStorage userStorage;
+    private final UserStorage userStorage;
 
     @Autowired
     public UserService(UserStorage userStorage) {
@@ -28,8 +28,8 @@ public class UserService {
     }
 
     //обновить данные пользователя
-    public User updateUser(User user) throws ValidationException, IncorrectParameterException {
-        validateUserExists(user.getId());
+    public User updateUser(User user) throws ValidationException {
+        checkUser(user.getId());
         validateUser(user);
         return userStorage.updateUser(user);
     }
@@ -40,38 +40,36 @@ public class UserService {
     }
 
     //получить пользователя по id
-    public User getUserById(long userId) throws IncorrectParameterException {
-        if (userId < 0) {
-            throw new IncorrectParameterException("id пользователя не может быть отрицательным.");
-        }
+    public User getUserById(long userId) {
+        checkUser(userId);
         return userStorage.getUserById(userId);
     }
 
     //добавить в друзья
-    public void addInFriend(long userId, long friendId) throws IncorrectParameterException {
-        validateUserExists(userId);
-        validateUserExists(friendId);
+    public void addInFriend(long userId, long friendId) {
+        checkUser(userId);
+        checkUser(friendId);
 
         User user = getUserById(userId);
         User friend = getUserById(friendId);
 
-//        user.getFriends().add(getUserById(friendId));
-//        friend.getFriends().add(getUserById(userId));
-        user.addInFriends(friend);
+        user.getFriends().add(getUserById(friendId));
+        friend.getFriends().add(getUserById(userId));
     }
 
     //получить список друзей пользователя user
-    public Set<User> getListFriends(long userId) throws IncorrectParameterException {
-        validateUserExists(userId);
+    public Set<User> getListFriends(long userId) {
+        checkUser(userId);
         User user = userStorage.getUserById(userId);
         return user.getFriends();
     }
 
     //удалить из друзей
-    public void deleteFromFriends(long userId, long friendId) throws IncorrectParameterException {
-        validateUserExists(userId);
+    public void deleteFromFriends(long userId, long friendId) {
+        checkUser(userId);
+        checkUser(friendId);
+
         User user = getUserById(userId);
-        validateUserExists(friendId);
         User friend = getUserById(friendId);
 
         user.getFriends().remove(friend);
@@ -79,9 +77,9 @@ public class UserService {
     }
 
     //получить список общих друзей
-    public List<User> getListCommonFriends(long user1, long user2) throws IncorrectParameterException {
-        validateUserExists(user1);
-        validateUserExists(user2);
+    public List<User> getListCommonFriends(long user1, long user2) {
+        checkUser(user1);
+        checkUser(user2);
 
         List<User> commonFriends = new ArrayList<>(getUserById(user1).getFriends());
         List<User> fr = new ArrayList<>(getUserById(user2).getFriends());
@@ -106,15 +104,11 @@ public class UserService {
             log.debug("Дата рождения в будущем");
             throw new ValidationException("Дата рождения не может быть в будущем.");
         }
-        if (user.getId() < 0) {
-            log.debug("id отрицателен");
-            throw new ValidationException("Id не может быть отрицательным.");
-        }
     }
 
-    protected void validateUserExists(long user) throws IncorrectParameterException {
-        if (getUserById(user) == null) {
-            throw new IncorrectParameterException(String.format("Пользователь c id %s не найден.", user));
+    private void checkUser(long userId) {
+        if (!userStorage.contains(userId)) {
+            throw new NotFoundException(String.format("Пользователь с id=%s не найден", userId));
         }
     }
 }

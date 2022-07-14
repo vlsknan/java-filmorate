@@ -2,8 +2,9 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -14,7 +15,7 @@ import java.util.*;
 @RequestMapping("/users")
 @Slf4j
 public class UserController {
-    private static UserService userService;
+    private final UserService userService;
 
     @Autowired
     public UserController(UserService userService) {
@@ -37,37 +38,38 @@ public class UserController {
 
     //обновить данные пользователя
     @PutMapping
-    public User updateUser(@RequestBody User user) throws ValidationException, IncorrectParameterException {
+    public User updateUser(@RequestBody User user) throws ValidationException {
         log.info("PUT user");
         return userService.updateUser(user);
     }
 
     //получить пользователя по id
     @GetMapping("/{id}")
-    public User getUserById(@PathVariable("id") long userId) throws IncorrectParameterException {
+    public User getUserById(@PathVariable("id") long userId) {
         log.info("GET user by id");
         return userService.getUserById(userId);
     }
 
     //получить список друзей
     @GetMapping("/{id}/friends")
-    public Set<User> getListFriends(@PathVariable("id") long userId) throws IncorrectParameterException {
+    public Set<User> getListFriends(@PathVariable("id") long userId) {
         log.info("GET list friends user with id={}", userId);
         return userService.getListFriends(userId);
     }
 
     //добавить в друзья
     @PutMapping("/{id}/friends/{friendId}")
-    public void addInFriends(@PathVariable("id") long userId,
-                             @PathVariable("friendId") long friendId) throws IncorrectParameterException {
+    public ResponseEntity<HttpStatus> addInFriends(@PathVariable("id") long userId,
+                                                   @PathVariable("friendId") long friendId) {
         log.info("PUT add user in friend");
         userService.addInFriend(userId, friendId);
+        return ResponseEntity.ok().build();
     }
 
     //удалить из друзей
     @DeleteMapping("/{id}/friends/{friendId}")
     public void deleteFromFriends(@PathVariable("id") long userId,
-                                  @PathVariable("friendId") long friendId) throws IncorrectParameterException {
+                                  @PathVariable("friendId") long friendId) {
         log.info("DELETE user from friend");
         userService.deleteFromFriends(userId, friendId);
     }
@@ -75,7 +77,7 @@ public class UserController {
     //получить список общих друзей
     @GetMapping("{id}/friends/common/{otherId}")
     public List<User> getListCommonFriends(@PathVariable("id") long userId,
-                                             @PathVariable("otherId") long otherId) throws IncorrectParameterException {
+                                           @PathVariable("otherId") long otherId) {
         log.info("GET common friends with user");
         return userService.getListCommonFriends(userId, otherId);
     }

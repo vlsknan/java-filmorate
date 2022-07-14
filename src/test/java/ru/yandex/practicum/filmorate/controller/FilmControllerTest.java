@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.time.LocalDate;
 
@@ -17,7 +19,7 @@ class FilmControllerTest {
 
     @BeforeEach
     protected void beforeEach() {
-        service = new FilmService();
+        service = new FilmService(new InMemoryFilmStorage(), new InMemoryUserStorage());
         film = new Film();
         film.setName("nisi eiusmod");
         film.setDescription("adipisicing");
@@ -50,14 +52,6 @@ class FilmControllerTest {
                 "«Форсаж 6» и вторая коллаборация между Джонсоном и Рейнольдсом после фильма «Форсаж: Хоббс и Шоу».");
         Exception ex = assertThrows(ValidationException.class, () -> service.validateFilm(film));
         assertEquals("Описание фильма не должно превышать 200 символов.", ex.getMessage());
-    }
-
-    @Test
-    @DisplayName("id отрицательный")
-    protected void validateIdTest() {
-        film.setId(-1);
-        Exception ex = assertThrows(ValidationException.class, () -> service.validateFilm(film));
-        assertEquals("Id не может быть отрицательным.", ex.getMessage());
     }
 
     @Test
