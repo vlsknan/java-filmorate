@@ -44,51 +44,50 @@ public class UserService {
         if (userId < 0) {
             throw new IncorrectParameterException("id пользователя не может быть отрицательным.");
         }
-        //validateUserExists(userId); //непройденные тесты увеличиваются
         return userStorage.getUserById(userId);
     }
 
     //добавить в друзья
     public void addInFriend(long userId, long friendId) throws IncorrectParameterException {
+        validateUserExists(userId);
+        validateUserExists(friendId);
+
         User user = getUserById(userId);
         User friend = getUserById(friendId);
-        user.getFriends().add(friend.getId());
-        friend.getFriends().add(user.getId());
+
+//        user.getFriends().add(getUserById(friendId));
+//        friend.getFriends().add(getUserById(userId));
+        user.addInFriends(friend);
     }
 
     //получить список друзей пользователя user
-    public Set<Long> getListFriends(long userId) throws IncorrectParameterException {
+    public Set<User> getListFriends(long userId) throws IncorrectParameterException {
         validateUserExists(userId);
         User user = userStorage.getUserById(userId);
-        Set<Long> friends = user.getFriends();
-        return friends;
+        return user.getFriends();
     }
 
     //удалить из друзей
     public void deleteFromFriends(long userId, long friendId) throws IncorrectParameterException {
+        validateUserExists(userId);
         User user = getUserById(userId);
+        validateUserExists(friendId);
         User friend = getUserById(friendId);
-        user.getFriends().remove(friend.getId());
-        friend.getFriends().remove(user.getId());
+
+        user.getFriends().remove(friend);
+        friend.getFriends().remove(user);
     }
 
     //получить список общих друзей
-    public Set<Long> getListCommonFriends(long user1, long user2) throws IncorrectParameterException {
-//        User user = getUserById(user1);
-//        User other = getUserById(user2);
-//        Set<Long> commonFriends = new HashSet<>();
-//        for (Long userList : user.getFriends()) {
-//            for (Long otherUserList : other.getFriends()) {
-//                if (userList == otherUserList) {
-//                 commonFriends.add(userList);
-//                }
-//            }
-//        }
-//        return commonFriends;
-        Set<Long> user1Friends = getUserById(user1).getFriends();
-        Set<Long> user2Friends = getUserById(user2).getFriends();
-        user1Friends.retainAll(user2Friends);
-        return user2Friends;
+    public List<User> getListCommonFriends(long user1, long user2) throws IncorrectParameterException {
+        validateUserExists(user1);
+        validateUserExists(user2);
+
+        List<User> commonFriends = new ArrayList<>(getUserById(user1).getFriends());
+        List<User> fr = new ArrayList<>(getUserById(user2).getFriends());
+        commonFriends.retainAll(fr);
+
+        return commonFriends;
     }
 
     public void validateUser(User user) throws ValidationException {

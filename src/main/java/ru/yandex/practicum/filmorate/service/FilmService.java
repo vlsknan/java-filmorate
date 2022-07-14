@@ -11,10 +11,7 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -59,19 +56,20 @@ public class FilmService {
     public void addLike(long filmId, long userId) throws IncorrectParameterException {
         Film film = getFilmById(filmId);
         User user = userStorage.getUserById(userId);
-        film.getLike().add(user.getId());
+        film.getLike().add(user);
     }
 
     //удалить у фильма лайк
     public void deleteLike(long filmId, long userId) throws IncorrectParameterException {
         Film film = getFilmById(filmId);
         User user = userStorage.getUserById(userId);
-        film.getLike().remove(user.getId());
+        film.getLike().remove(user);
     }
 
     //получить список популярных фильмов (из первых count фильмов по количеству лайков)
-    public Collection<Film> getListPopularFilm(long count) {
+    public List<Film> getListPopularFilm(long count) {
         return filmStorage.getFilms().stream()
+                //.sorted(Comparator.comparing(Film::getLike, Comparator.reverseOrder()))
                 .sorted(Collections.reverseOrder())
                 // .map(Film::getLike)
                 //.sorted(Comparator.comparing(Film::getLike).reverseOrder())

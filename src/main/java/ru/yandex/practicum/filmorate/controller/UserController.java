@@ -51,10 +51,9 @@ public class UserController {
 
     //получить список друзей
     @GetMapping("/{id}/friends")
-    public Set<Long> getListFriends(@PathVariable("id") long userId) throws IncorrectParameterException {
+    public Set<User> getListFriends(@PathVariable("id") long userId) throws IncorrectParameterException {
         log.info("GET list friends user with id={}", userId);
-        Set<Long> fr = userService.getListFriends(userId);
-        return fr;
+        return userService.getListFriends(userId);
     }
 
     //добавить в друзья
@@ -75,7 +74,7 @@ public class UserController {
 
     //получить список общих друзей
     @GetMapping("{id}/friends/common/{otherId}")
-    public Set<Long> getListCommonFriends(@PathVariable("id") long userId,
+    public List<User> getListCommonFriends(@PathVariable("id") long userId,
                                              @PathVariable("otherId") long otherId) throws IncorrectParameterException {
         log.info("GET common friends with user");
         return userService.getListCommonFriends(userId, otherId);
