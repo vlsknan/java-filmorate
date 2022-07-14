@@ -16,4 +16,19 @@ public class Film {
     private int duration;
     @JsonIgnore
     private Set<User> like = new HashSet<>();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Film film = (Film) o;
+
+        return id == film.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return (int) (id ^ (id >>> 32));
+    }
 }

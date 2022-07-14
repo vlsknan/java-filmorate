@@ -8,13 +8,12 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 @Component
 @Slf4j
 public class InMemoryUserStorage implements UserStorage {
-    public final Map<Long, User> users;
     private static long id;
+    public final Map<Long, User> users;
 
     public InMemoryUserStorage() {
         id = 0;
@@ -46,14 +45,19 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User updateUser(User user) {
-            users.put(user.getId(), user);
-            log.info("Пользователь с адресом электронной почты {} обновлен", user.getEmail());
+        users.put(user.getId(), user);
+        log.info("Пользователь с адресом электронной почты {} обновлен", user.getEmail());
         return user;
     }
 
     @Override
     public User getUserById(long userId) {
         return users.get(userId);
+    }
+
+    @Override
+    public boolean contains(long id) {
+        return users.containsKey(id);
     }
 
 //    @Override

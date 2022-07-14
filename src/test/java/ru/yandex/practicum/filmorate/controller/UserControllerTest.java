@@ -6,31 +6,26 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class UserControllerTest {
     private User user;
     private UserService service;
 
+
     @BeforeEach
     protected void beforeEach() {
-        service = new UserService();
+        service = new UserService(new InMemoryUserStorage());
         user = new User();
         user.setLogin("dolore");
         user.setName("Nick Name");
         user.setBirthday(LocalDate.of(1946, 8, 20));
         user.setEmail("mail@mail.ru");
-    }
-
-    @Test
-    @DisplayName("id отрицательный")
-    protected void validateIdTest() {
-        user.setId(-1);
-        Exception ex = assertThrows(ValidationException.class, () -> service.validateUser(user));
-        assertEquals("Id не может быть отрицательным.", ex.getMessage());
     }
 
     @Test
@@ -48,6 +43,7 @@ class UserControllerTest {
         service.validateUser(user);
         assertEquals(user.getLogin(), user.getName());
     }
+
     @Test
     @DisplayName("почта пустая")
     protected void validateEmailNullTest() {
@@ -61,7 +57,8 @@ class UserControllerTest {
     protected void validateEmailTest() {
         user.setEmail("afgs.yan.ru");
         Exception ex = assertThrows(ValidationException.class, () -> service.validateUser(user));
-        assertEquals("Проверьте адрес электронной почты.", ex.getMessage());;
+        assertEquals("Проверьте адрес электронной почты.", ex.getMessage());
+        ;
     }
 
     @Test

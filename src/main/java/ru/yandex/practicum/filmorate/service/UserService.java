@@ -9,12 +9,15 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 @Service
 @Slf4j
 public class UserService {
-    private UserStorage userStorage;
+    private final UserStorage userStorage;
 
     @Autowired
     public UserService(UserStorage userStorage) {
@@ -55,8 +58,6 @@ public class UserService {
         User user = getUserById(userId);
         User friend = getUserById(friendId);
 
-//        user.getFriends().add(getUserById(friendId));
-//        friend.getFriends().add(getUserById(userId));
         user.addInFriends(friend);
     }
 
@@ -105,10 +106,6 @@ public class UserService {
         if (user.getBirthday().isAfter(LocalDate.now())) {
             log.debug("Дата рождения в будущем");
             throw new ValidationException("Дата рождения не может быть в будущем.");
-        }
-        if (user.getId() < 0) {
-            log.debug("id отрицателен");
-            throw new ValidationException("Id не может быть отрицательным.");
         }
     }
 

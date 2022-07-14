@@ -6,19 +6,15 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.util.Collection;
-import java.util.List;
 
 @RestController
 @RequestMapping("/films")
 @Slf4j
 public class FilmController {
-    private static FilmService filmService;
+    private final FilmService filmService;
 
     @Autowired
     public FilmController(FilmService filmService) {
@@ -59,13 +55,13 @@ public class FilmController {
     //удалить лайк у фильма
     @DeleteMapping("/{id}/like/{userId}")
     public void deleteLike(@PathVariable("id") long filmId,
-                        @PathVariable("userId") long userId) throws IncorrectParameterException {
+                           @PathVariable("userId") long userId) throws IncorrectParameterException {
         filmService.deleteLike(filmId, userId);
     }
 
     //получить список из первых count фильмов по количеству лайков
     @GetMapping("/popular")
-    public Collection<Film> getListPopularFilm(@RequestParam(value = "count", defaultValue = "10") long count) {
+    public Collection<Film> getListPopularFilm(@RequestParam(defaultValue = "10") int count) {
         return filmService.getListPopularFilm(count);
     }
- }
+}

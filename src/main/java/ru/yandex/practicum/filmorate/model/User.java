@@ -19,13 +19,28 @@ public class User {
     @ToString.Exclude
     private Set<User> friends = new HashSet<>();
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        User user = (User) o;
+
+        return id == user.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return (int) (id ^ (id >>> 32));
+    }
+
     public void addInFriends(User friend) {
         friends.add(friend);
         friend.friends.add(this);
     }
-//
-//    public void removeFriend(User friend) {
-//        friends.remove(friend);
-//        friend.friends.remove(this);
-//    }
+
+    public void removeFriend(User friend) {
+        friends.remove(friend);
+        friend.friends.remove(this);
+    }
 }

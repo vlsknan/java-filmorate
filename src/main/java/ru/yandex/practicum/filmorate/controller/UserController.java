@@ -2,19 +2,23 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/users")
 @Slf4j
 public class UserController {
-    private static UserService userService;
+    private final UserService userService;
 
     @Autowired
     public UserController(UserService userService) {
@@ -58,10 +62,11 @@ public class UserController {
 
     //добавить в друзья
     @PutMapping("/{id}/friends/{friendId}")
-    public void addInFriends(@PathVariable("id") long userId,
-                             @PathVariable("friendId") long friendId) throws IncorrectParameterException {
+    public ResponseEntity<HttpStatus> addInFriends(@PathVariable("id") long userId,
+                                                   @PathVariable("friendId") long friendId) throws IncorrectParameterException {
         log.info("PUT add user in friend");
         userService.addInFriend(userId, friendId);
+        return ResponseEntity.ok().build();
     }
 
     //удалить из друзей
@@ -75,7 +80,7 @@ public class UserController {
     //получить список общих друзей
     @GetMapping("{id}/friends/common/{otherId}")
     public List<User> getListCommonFriends(@PathVariable("id") long userId,
-                                             @PathVariable("otherId") long otherId) throws IncorrectParameterException {
+                                           @PathVariable("otherId") long otherId) throws IncorrectParameterException {
         log.info("GET common friends with user");
         return userService.getListCommonFriends(userId, otherId);
     }

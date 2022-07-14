@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.ErrorResponse;
 
@@ -29,6 +30,13 @@ public class ErrorHandler {
     public ErrorResponse handleNotFoundException(final IncorrectParameterException e) {
         log.info("404: {}", e.getParameter());
         return new ErrorResponse(String.format("Ошибка с полем \"%s\".", e.getParameter()));
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleNotFoundException(final NotFoundException e) {
+        log.info("404: {}", e.getMessage());
+        return new ErrorResponse(String.format("Ошибка с полем \"%s\".", e.getMessage()));
     }
 
     @ExceptionHandler
