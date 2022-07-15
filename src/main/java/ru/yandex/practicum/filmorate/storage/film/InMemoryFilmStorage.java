@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -26,13 +25,13 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Collection<Film> getFilms() {
+    public Collection<Film> getAll() {
         log.info("Количество фильмов: {}", films.size());
         return films.values();
     }
 
     @Override
-    public Film createFilm(Film film) throws ValidationException {
+    public Film create(Film film) throws ValidationException {
         if (films.containsKey(film.getId())) {
             throw new ValidationException("Фильм \"" +
                     film.getName() + "\" уже есть в списке.");
@@ -45,9 +44,9 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film updateFilm(Film film) throws ValidationException {
+    public Film update(Film film) throws ValidationException {
         if (!films.containsKey(film.getId())) {
-            createFilm(film);
+            this.create(film);
         } else {
             films.put(film.getId(), film);
             log.info("Фильм {} обновлен.", film.getName());
@@ -56,7 +55,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film getFilmById(long id) {
+    public Film getById(long id) {
         return films.get(id);
     }
 

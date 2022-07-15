@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.service.user.UserService;
 
 import java.util.*;
 
@@ -26,28 +26,28 @@ public class UserController {
     @GetMapping
     public Collection<User> getUsers() {
         log.info("GET users");
-        return userService.getUsers();
+        return userService.getAll();
     }
 
     //создать пользователя
     @PostMapping
     public User createUser(@RequestBody User user) throws ValidationException {
         log.info("POST user");
-        return userService.createUser(user);
+        return userService.create(user);
     }
 
     //обновить данные пользователя
     @PutMapping
     public User updateUser(@RequestBody User user) throws ValidationException {
         log.info("PUT user");
-        return userService.updateUser(user);
+        return userService.update(user);
     }
 
     //получить пользователя по id
     @GetMapping("/{id}")
     public User getUserById(@PathVariable("id") long userId) {
         log.info("GET user by id");
-        return userService.getUserById(userId);
+        return userService.getById(userId);
     }
 
     //получить список друзей

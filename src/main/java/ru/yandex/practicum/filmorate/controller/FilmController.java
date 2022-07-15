@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.film.FilmService;
 
 import java.util.Collection;
 
@@ -24,28 +24,28 @@ public class FilmController {
     @GetMapping
     public Collection<Film> getFilms() {
         log.info("GET list films all");
-        return filmService.getFilms();
+        return filmService.getAll();
     }
 
     //получить фильм по id
     @GetMapping("/{id}")
     public Film getFilmById(@PathVariable long id) {
         log.info("GET film by id");
-        return filmService.getFilmById(id);
+        return filmService.getById(id);
     }
 
     //создать фильм
     @PostMapping
     public Film createFilm(@RequestBody Film film) throws ValidationException {
         log.info("POST create film");
-        return filmService.createFilm(film);
+        return filmService.create(film);
     }
 
     //обновить данные о фильме
     @PutMapping
     public Film updateFilm(@RequestBody Film film) throws ValidationException {
         log.info("PUT update film");
-        return filmService.updateFilm(film);
+        return filmService.update(film);
     }
 
     //поставить лайк фильму

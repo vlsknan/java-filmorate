@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.service;
+package ru.yandex.practicum.filmorate.service.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.GeneralService;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
@@ -13,7 +14,7 @@ import java.util.*;
 
 @Service
 @Slf4j
-public class UserService {
+public class UserService implements GeneralService<User> {
     private final UserStorage userStorage;
 
     @Autowired
@@ -22,55 +23,55 @@ public class UserService {
     }
 
     //создать пользователя
-    public User createUser(User user) throws ValidationException {
-        validateUser(user);
-        return userStorage.createUser(user);
+    public User create(User user) throws ValidationException {
+        validate(user);
+        return userStorage.create(user);
     }
 
     //обновить данные пользователя
-    public User updateUser(User user) throws ValidationException {
-        checkUser(user.getId());
-        validateUser(user);
-        return userStorage.updateUser(user);
+    public User update(User user) throws ValidationException {
+        check(user.getId());
+        validate(user);
+        return userStorage.update(user);
     }
 
     //получить список пользователей
-    public Collection<User> getUsers() {
-        return userStorage.getUsers();
+    public Collection<User> getAll() {
+        return userStorage.getAll();
     }
 
     //получить пользователя по id
-    public User getUserById(long userId) {
-        checkUser(userId);
-        return userStorage.getUserById(userId);
+    public User getById(long userId) {
+        check(userId);
+        return userStorage.getById(userId);
     }
 
     //добавить в друзья
     public void addInFriend(long userId, long friendId) {
-        checkUser(userId);
-        checkUser(friendId);
+        check(userId);
+        check(friendId);
 
-        User user = getUserById(userId);
-        User friend = getUserById(friendId);
+        User user = getById(userId);
+        User friend = getById(friendId);
 
-        user.getFriends().add(getUserById(friendId));
-        friend.getFriends().add(getUserById(userId));
+        user.getFriends().add(getById(friendId));
+        friend.getFriends().add(getById(userId));
     }
 
     //получить список друзей пользователя user
     public Set<User> getListFriends(long userId) {
-        checkUser(userId);
-        User user = userStorage.getUserById(userId);
+        check(userId);
+        User user = userStorage.getById(userId);
         return user.getFriends();
     }
 
     //удалить из друзей
     public void deleteFromFriends(long userId, long friendId) {
-        checkUser(userId);
-        checkUser(friendId);
+        check(userId);
+        check(friendId);
 
-        User user = getUserById(userId);
-        User friend = getUserById(friendId);
+        User user = getById(userId);
+        User friend = getById(friendId);
 
         user.getFriends().remove(friend);
         friend.getFriends().remove(user);
@@ -78,17 +79,17 @@ public class UserService {
 
     //получить список общих друзей
     public List<User> getListCommonFriends(long user1, long user2) {
-        checkUser(user1);
-        checkUser(user2);
+        check(user1);
+        check(user2);
 
-        List<User> commonFriends = new ArrayList<>(getUserById(user1).getFriends());
-        List<User> fr = new ArrayList<>(getUserById(user2).getFriends());
+        List<User> commonFriends = new ArrayList<>(getById(user1).getFriends());
+        List<User> fr = new ArrayList<>(getById(user2).getFriends());
         commonFriends.retainAll(fr);
 
         return commonFriends;
     }
 
-    public void validateUser(User user) throws ValidationException {
+    public void validate(User user) throws ValidationException {
         if (user.getEmail() == null || !user.getEmail().contains("@")) {
             log.debug("Адрес электронной почты пуст/не содержит @");
             throw new ValidationException("Проверьте адрес электронной почты.");
@@ -106,7 +107,7 @@ public class UserService {
         }
     }
 
-    private void checkUser(long userId) {
+    public void check(long userId) {
         if (!userStorage.contains(userId)) {
             throw new NotFoundException(String.format("Пользователь с id=%s не найден", userId));
         }

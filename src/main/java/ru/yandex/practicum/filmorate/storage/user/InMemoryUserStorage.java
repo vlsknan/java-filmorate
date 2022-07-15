@@ -25,13 +25,13 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public Collection<User> getUsers() {
+    public Collection<User> getAll() {
         log.info("Количество пользователей: {}", users.size());
         return users.values();
     }
 
     @Override
-    public User createUser(User user) throws ValidationException {
+    public User create(User user) throws ValidationException {
         if (users.containsKey(user.getId())) {
             throw new ValidationException("Пользователь с электронной почтой " +
                     user.getEmail() + " уже зарегистрирован.");
@@ -44,14 +44,14 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User updateUser(User user) {
+    public User update(User user) {
         users.put(user.getId(), user);
         log.info("Пользователь с адресом электронной почты {} обновлен", user.getEmail());
         return user;
     }
 
     @Override
-    public User getUserById(long userId) {
+    public User getById(long userId) {
         return users.get(userId);
     }
 
