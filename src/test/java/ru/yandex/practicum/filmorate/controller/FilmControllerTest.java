@@ -5,6 +5,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.film.FilmService;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.time.LocalDate;
 
@@ -12,11 +15,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class FilmControllerTest {
     private Film film;
-    private FilmController controller;
+    private FilmService service;
 
     @BeforeEach
     protected void beforeEach() {
-        controller = new FilmController();
+        service = new FilmService(new InMemoryFilmStorage(), new InMemoryUserStorage());
         film = new Film();
         film.setName("nisi eiusmod");
         film.setDescription("adipisicing");
@@ -28,7 +31,7 @@ class FilmControllerTest {
     @DisplayName("название фильма пустое (null)")
     protected void validateNameNullTest() {
         film.setName(null);
-        Exception ex = assertThrows(ValidationException.class, () -> controller.validateFilm(film));
+        Exception ex = assertThrows(ValidationException.class, () -> service.validate(film));
         assertEquals("Название фильма не указано.", ex.getMessage());
     }
 
@@ -36,7 +39,7 @@ class FilmControllerTest {
     @DisplayName("название фильма пустое")
     protected void validateNameTest() {
         film.setName("");
-        Exception ex = assertThrows(ValidationException.class, () -> controller.validateFilm(film));
+        Exception ex = assertThrows(ValidationException.class, () -> service.validate(film));
         assertEquals("Название фильма не указано.", ex.getMessage());
     }
     @Test
@@ -47,23 +50,15 @@ class FilmControllerTest {
                 "Тёрбера и Джонсона после картин «Полтора шпиона» и «Небоскрёб», " +
                 "третья совместная работа Гадот и Джонсона после фильмов «Форсаж 5» и " +
                 "«Форсаж 6» и вторая коллаборация между Джонсоном и Рейнольдсом после фильма «Форсаж: Хоббс и Шоу».");
-        Exception ex = assertThrows(ValidationException.class, () -> controller.validateFilm(film));
+        Exception ex = assertThrows(ValidationException.class, () -> service.validate(film));
         assertEquals("Описание фильма не должно превышать 200 символов.", ex.getMessage());
-    }
-
-    @Test
-    @DisplayName("id отрицательный")
-    protected void validateIdTest() {
-        film.setId(-1);
-        Exception ex = assertThrows(ValidationException.class, () -> controller.validateFilm(film));
-        assertEquals("Id не может быть отрицательным.", ex.getMessage());
     }
 
     @Test
     @DisplayName("продолжительность отрицательная")
     protected void validateDurationTest() {
         film.setDuration(-10);
-        Exception ex = assertThrows(ValidationException.class, () -> controller.validateFilm(film));
+        Exception ex = assertThrows(ValidationException.class, () -> service.validate(film));
         assertEquals("Продолжительность фильма не может быть отрицательной.", ex.getMessage());
     }
 
@@ -71,7 +66,7 @@ class FilmControllerTest {
     @DisplayName("релиз раньше 20 декабря 1895 года")
     protected void validateReleaseTest() {
         film.setReleaseDate(LocalDate.of(1745, 11,1));
-        Exception exception = assertThrows(ValidationException.class, () -> controller.validateFilm(film));
+        Exception exception = assertThrows(ValidationException.class, () -> service.validate(film));
         assertEquals("Дата релиза не может быть раньше 28 декабря 1895 года.", exception.getMessage());
     }
 }
