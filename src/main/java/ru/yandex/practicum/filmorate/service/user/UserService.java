@@ -15,35 +15,35 @@ import java.util.*;
 @Service
 @Slf4j
 public class UserService implements GeneralService<User> {
-    private final UserStorage userStorage;
+    private final UserStorage userDbStorage;
 
     @Autowired
-    public UserService(UserStorage userStorage) {
-        this.userStorage = userStorage;
+    public UserService(UserStorage userDbStorage) {
+        this.userDbStorage = userDbStorage;
     }
 
     //создать пользователя
     public User create(User user) throws ValidationException {
         validate(user);
-        return userStorage.create(user);
+        return userDbStorage.create(user);
     }
 
     //обновить данные пользователя
     public User update(User user) throws ValidationException {
         check(user.getId());
         validate(user);
-        return userStorage.update(user);
+        return userDbStorage.update(user);
     }
 
     //получить список пользователей
     public Collection<User> getAll() {
-        return userStorage.getAll();
+        return userDbStorage.getAll();
     }
 
     //получить пользователя по id
     public User getById(long userId) {
         check(userId);
-        return userStorage.getById(userId);
+        return userDbStorage.getById(userId);
     }
 
     //добавить в друзья
@@ -61,7 +61,7 @@ public class UserService implements GeneralService<User> {
     //получить список друзей пользователя user
     public Set<User> getListFriends(long userId) {
         check(userId);
-        User user = userStorage.getById(userId);
+        User user = userDbStorage.getById(userId);
         return user.getFriends();
     }
 
@@ -108,7 +108,7 @@ public class UserService implements GeneralService<User> {
     }
 
     public void check(long userId) {
-        if (!userStorage.contains(userId)) {
+        if (!userDbStorage.contains(userId)) {
             throw new NotFoundException(String.format("Пользователь с id=%s не найден", userId));
         }
     }

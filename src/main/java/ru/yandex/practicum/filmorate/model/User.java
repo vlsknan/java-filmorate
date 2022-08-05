@@ -1,13 +1,17 @@
 package ru.yandex.practicum.filmorate.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
 @Data
+@AllArgsConstructor
+@EqualsAndHashCode(of = "id")
 public class User {
     private long id;
     private String email;
@@ -17,8 +21,9 @@ public class User {
     @JsonIgnore
     private Set<User> friends = new HashSet<>();
 
-    @Override
-    public int hashCode() {
-        return (int) (id ^ (id >>> 32));
-    }
+
+//    @Override
+//    public int hashCode() {
+//        return (int) (id ^ (id >>> 32));
+//    }
 }

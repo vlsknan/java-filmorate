@@ -6,11 +6,13 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.GeneralService;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -18,52 +20,52 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class FilmService implements GeneralService<Film> {
-    private final FilmStorage filmStorage;
-    private final UserStorage userStorage;
+    private final FilmStorage filmDbStorage;
+    private final UserStorage userDbStorage;
     private static final LocalDate REFERENCE_DATE = LocalDate.of(1895,12,28);
 
     @Autowired
-    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
-        this.filmStorage = filmStorage;
-        this.userStorage = userStorage;
+    public FilmService(FilmStorage filmDbStorage, UserStorage userDbStorage) {
+        this.filmDbStorage = filmDbStorage;
+        this.userDbStorage = userDbStorage;
     }
 
     //получить список всех фильмов
-    public Collection<Film> getAll() {
-        return filmStorage.getAll();
+    public Collection<Film> getAll() throws SQLException {
+        return filmDbStorage.getAll();
     }
 
     //получить фильм по id
-    public Film getById(long filmId) {
+    public Film getById(long filmId) throws SQLException {
         check(filmId);
-        return filmStorage.getById(filmId);
+        return filmDbStorage.getById(filmId);
     }
 
     //создать фильм
     public Film create(Film film) throws ValidationException {
         validate(film);
-        return filmStorage.create(film);
+        return filmDbStorage.create(film);
     }
 
     //обновить данные о фильме
-    public Film update(Film film) throws ValidationException {
+    public Film update(Film film) throws ValidationException, SQLException {
         check(film.getId());
         validate(film);
-        return filmStorage.update(film);
+        return filmDbStorage.update(film);
     }
 
     //добавить фильму лайк
-    public void addLike(long filmId, long userId) {
+    public void addLike(long filmId, long userId) throws SQLException {
         Film film = getById(filmId);
-        User user = userStorage.getById(userId);
+        User user = userDbStorage.getById(userId);
         film.getLike().add(user);
     }
 
     //удалить у фильма лайк
-    public void deleteLike(long filmId, long userId) {
+    public void deleteLike(long filmId, long userId) throws SQLException {
         check(filmId);
         Film film = getById(filmId);
-        User user = userStorage.getById(userId);
+        User user = userDbStorage.getById(userId);
         if (user == null) {
             throw new NotFoundException("Пользователь не найден");
         }
@@ -71,8 +73,8 @@ public class FilmService implements GeneralService<Film> {
     }
 
     //получить список популярных фильмов (из первых count фильмов по количеству лайков)
-    public List<Film> getListPopularFilm(long count) {
-        return filmStorage.getAll().stream()
+    public List<Film> getListPopularFilm(long count) throws SQLException {
+        return filmDbStorage.getAll().stream()
                 .sorted(Comparator.comparing(film -> film.getLike().size(), Comparator.reverseOrder()))
                 .limit(count)
                 .collect(Collectors.toList());
@@ -97,9 +99,17 @@ public class FilmService implements GeneralService<Film> {
         }
     }
 
-    public void check(long filmId) {
-        if (!filmStorage.contains(filmId)) {
+    public void check(long filmId) throws SQLException {
+        if (!filmDbStorage.contains(filmId)) {
             throw new NotFoundException(String.format("Фильм с id=%s не найден", filmId));
         }
+    }
+
+    public List<Genre> getAllGenres() {
+        return filmDbStorage.getAllGenres();
+    }
+
+    public Map<Long, Genre> getGenreById(long id) {
+        return filmDbStorage.getGenreById(id);
     }
 }

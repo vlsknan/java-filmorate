@@ -5,9 +5,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.service.film.FilmService;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/films")
@@ -69,5 +72,15 @@ public class FilmController {
     public Collection<Film> getListPopularFilm(@RequestParam(defaultValue = "10") int count) {
         log.info("GET list popular film(size = count)");
         return filmService.getListPopularFilm(count);
+    }
+
+    @GetMapping("/genres")
+    public List<Genre> getAllGenres() {
+        return filmService.getAllGenres();
+    }
+
+    @GetMapping("/genres/{id}")
+    public Map<Long, Genre> getGenreById(@PathVariable("id") long genreId) {
+        return filmService.getGenreById(genreId);
     }
  }
