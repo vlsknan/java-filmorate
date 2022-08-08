@@ -59,7 +59,7 @@ public class UserDbStorage implements UserStorage {
     @Override
     public User update(User user) {
         String sqlQuery = "update USERS set " +
-                "USER_NAME = ?, LOGIN = ?, EMAIL = ?, BIRTHDAY = ?";
+                "USER_NAME = ?, LOGIN = ?, EMAIL = ?, BIRTHDAY = ? where USER_ID = ?";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement stmt = connection.prepareStatement(sqlQuery, new String[]{"USER_ID"});
@@ -72,6 +72,7 @@ public class UserDbStorage implements UserStorage {
             } else {
                 stmt.setDate(4, Date.valueOf(birthday));
             }
+            stmt.setLong(5, user.getId());
             return stmt;
         }, keyHolder);
         return user;

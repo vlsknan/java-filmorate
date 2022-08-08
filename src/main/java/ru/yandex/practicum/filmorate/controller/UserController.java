@@ -70,10 +70,11 @@ public class UserController {
 
     //удалить из друзей
     @DeleteMapping("/{id}/friends/{friendId}")
-    public void deleteFromFriends(@PathVariable("id") long userId,
+    public ResponseEntity<HttpStatus> deleteFromFriends(@PathVariable("id") long userId,
                                   @PathVariable("friendId") long friendId) throws SQLException {
         log.info("DELETE user from friend");
         userService.deleteFromFriends(userId, friendId);
+        return ResponseEntity.ok().build();
     }
 
     //получить список общих друзей

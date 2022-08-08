@@ -2,6 +2,8 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -54,18 +56,20 @@ public class FilmController {
 
     //поставить лайк фильму
     @PutMapping("/{id}/like/{userId}")
-    public void addLike(@PathVariable("id") long filmId,
+    public ResponseEntity<HttpStatus> addLike(@PathVariable("id") long filmId,
                         @PathVariable long userId) throws SQLException {
         log.info("PUT user set liked the film");
         filmService.addLike(filmId, userId);
+        return ResponseEntity.ok().build();
     }
 
     //удалить лайк у фильма
     @DeleteMapping("/{id}/like/{userId}")
-    public void deleteLike(@PathVariable("id") long filmId,
-                           @PathVariable long userId) throws SQLException {
+    public ResponseEntity<HttpStatus> deleteLike(@PathVariable("id") long filmId,
+                                                 @PathVariable long userId) throws SQLException {
         log.info("DELETE user deleted like from the film");
         filmService.deleteLike(filmId, userId);
+        return ResponseEntity.ok().build();
     }
 
     //получить список из первых count фильмов по количеству лайков

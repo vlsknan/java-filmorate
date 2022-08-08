@@ -19,7 +19,7 @@ public class MpaDbStorage {
     }
 
     //получить рейтинг
-    public Collection<Mpa> getMpa() throws SQLException {
+    public Collection<Mpa> getAllMpa() throws SQLException {
         final String sqlQuery = "select * from MPA";
         ResultSet rs = (ResultSet) jdbcTemplate.queryForList(sqlQuery);
         final Collection<Mpa> listMpa = new ArrayList<>();

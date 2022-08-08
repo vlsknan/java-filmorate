@@ -3,40 +3,28 @@ package ru.yandex.practicum.filmorate.service.film;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import ru.yandex.practicum.filmorate.dao.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.GeneralService;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class FilmService implements GeneralService<Film> {
     private final FilmDbStorage filmDbStorage;
-    private final MpaDbStorage mpaDbStorage;
 
-    private final GenreBdStorage genreBdStorage;
     private final LikeDbStorage likeDbStorage;
     private static final LocalDate REFERENCE_DATE = LocalDate.of(1895,12,28);
 
     @Autowired
-    public FilmService(FilmDbStorage filmDbStorage, MpaDbStorage mpaDbStorage,
-                       GenreBdStorage genreBdStorage, LikeDbStorage likeDbStorage) {
+    public FilmService(FilmDbStorage filmDbStorage, LikeDbStorage likeDbStorage) {
         this.filmDbStorage = filmDbStorage;
-        this.mpaDbStorage = mpaDbStorage;
-        this.genreBdStorage = genreBdStorage;
         this.likeDbStorage = likeDbStorage;
     }
 
@@ -86,30 +74,13 @@ public class FilmService implements GeneralService<Film> {
 
     //получить список популярных фильмов (из первых count фильмов по количеству лайков)
     public List<Film> getListPopularFilm(long count) throws SQLException {
-        return filmDbStorage.getAll().stream()
-                .sorted(Comparator.comparing(film -> film.getLike().size(), Comparator.reverseOrder()))
-                .limit(count)
-                .collect(Collectors.toList());
+//        return filmDbStorage.getAll().stream()
+//                .sorted(Comparator.comparing(film -> film.getLike().size(), Comparator.reverseOrder()))
+//                .limit(count)
+//                .collect(Collectors.toList());
+        return likeDbStorage.getListPopularFilm(count);
     }
 
-    //получить все жанрры
-    public Collection<Genre> getAllGenres() throws SQLException {
-        return genreBdStorage.getAllGenres();
-    }
-
-    //получить жанр по id
-    public Genre getGenreById(long id) throws SQLException {
-        return genreBdStorage.getGenreById(id);
-    }
-
-    public Collection<Mpa> getMpa() throws SQLException {
-        return mpaDbStorage.getMpa();
-    }
-
-    //получить жанр по id
-    public Mpa getMpaById(long id) throws SQLException {
-        return mpaDbStorage.getMpaById(id);
-    }
 
     public void validate(Film film) throws ValidationException {
         if (film.getName() == null || film.getName().isBlank()) {
