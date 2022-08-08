@@ -5,6 +5,7 @@ import lombok.*;
 @Getter
 @Setter
 @RequiredArgsConstructor
+@AllArgsConstructor
 @ToString
 @EqualsAndHashCode(of = "id")
 public class Genre {

@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.user.UserService;
 
+import java.sql.SQLException;
 import java.util.*;
 
 @RestController
@@ -25,7 +26,7 @@ public class UserController {
 
     //получить список пользователей
     @GetMapping
-    public Collection<User> getUsers() {
+    public Collection<User> getUsers() throws SQLException {
         log.info("GET users");
         return userService.getAll();
     }
@@ -39,21 +40,21 @@ public class UserController {
 
     //обновить данные пользователя
     @PutMapping
-    public User updateUser(@RequestBody User user) throws ValidationException {
+    public User updateUser(@RequestBody User user) throws ValidationException, SQLException {
         log.info("PUT user");
         return userService.update(user);
     }
 
     //получить пользователя по id
     @GetMapping("/{id}")
-    public User getUserById(@PathVariable("id") long userId) {
+    public User getUserById(@PathVariable("id") long userId) throws SQLException {
         log.info("GET user by id");
         return userService.getById(userId);
     }
 
     //получить список друзей
     @GetMapping("/{id}/friends")
-    public Set<User> getListFriends(@PathVariable("id") long userId) {
+    public Set<User> getListFriends(@PathVariable("id") long userId) throws SQLException {
         log.info("GET list friends user with id={}", userId);
         return userService.getListFriends(userId);
     }
@@ -61,7 +62,7 @@ public class UserController {
     //добавить в друзья
     @PutMapping("/{id}/friends/{friendId}")
     public ResponseEntity<HttpStatus> addInFriends(@PathVariable("id") long userId,
-                                                   @PathVariable("friendId") long friendId) {
+                                                   @PathVariable("friendId") long friendId) throws SQLException {
         log.info("PUT add user in friend");
         userService.addInFriend(userId, friendId);
         return ResponseEntity.ok().build();
@@ -70,7 +71,7 @@ public class UserController {
     //удалить из друзей
     @DeleteMapping("/{id}/friends/{friendId}")
     public void deleteFromFriends(@PathVariable("id") long userId,
-                                  @PathVariable("friendId") long friendId) {
+                                  @PathVariable("friendId") long friendId) throws SQLException {
         log.info("DELETE user from friend");
         userService.deleteFromFriends(userId, friendId);
     }
@@ -78,7 +79,7 @@ public class UserController {
     //получить список общих друзей
     @GetMapping("{id}/friends/common/{otherId}")
     public List<User> getListCommonFriends(@PathVariable("id") long userId,
-                                           @PathVariable("otherId") long otherId) {
+                                           @PathVariable("otherId") long otherId) throws SQLException {
         log.info("GET common friends with user");
         return userService.getListCommonFriends(userId, otherId);
     }

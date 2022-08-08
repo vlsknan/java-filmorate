@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.service.film.FilmService;
 
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -25,14 +26,14 @@ public class FilmController {
 
     //получить список всех фильмов
     @GetMapping
-    public Collection<Film> getFilms() {
+    public Collection<Film> getFilms() throws SQLException {
         log.info("GET list films all");
         return filmService.getAll();
     }
 
     //получить фильм по id
     @GetMapping("/{id}")
-    public Film getFilmById(@PathVariable long id) {
+    public Film getFilmById(@PathVariable long id) throws SQLException {
         log.info("GET film by id");
         return filmService.getById(id);
     }
@@ -46,7 +47,7 @@ public class FilmController {
 
     //обновить данные о фильме
     @PutMapping
-    public Film updateFilm(@RequestBody Film film) throws ValidationException {
+    public Film updateFilm(@RequestBody Film film) throws ValidationException, SQLException {
         log.info("PUT update film");
         return filmService.update(film);
     }
@@ -54,7 +55,7 @@ public class FilmController {
     //поставить лайк фильму
     @PutMapping("/{id}/like/{userId}")
     public void addLike(@PathVariable("id") long filmId,
-                        @PathVariable long userId) {
+                        @PathVariable long userId) throws SQLException {
         log.info("PUT user set liked the film");
         filmService.addLike(filmId, userId);
     }
@@ -62,25 +63,15 @@ public class FilmController {
     //удалить лайк у фильма
     @DeleteMapping("/{id}/like/{userId}")
     public void deleteLike(@PathVariable("id") long filmId,
-                           @PathVariable long userId) {
+                           @PathVariable long userId) throws SQLException {
         log.info("DELETE user deleted like from the film");
         filmService.deleteLike(filmId, userId);
     }
 
     //получить список из первых count фильмов по количеству лайков
     @GetMapping("/popular")
-    public Collection<Film> getListPopularFilm(@RequestParam(defaultValue = "10") int count) {
+    public Collection<Film> getListPopularFilm(@RequestParam(defaultValue = "10") int count) throws SQLException {
         log.info("GET list popular film(size = count)");
         return filmService.getListPopularFilm(count);
-    }
-
-    @GetMapping("/genres")
-    public List<Genre> getAllGenres() {
-        return filmService.getAllGenres();
-    }
-
-    @GetMapping("/genres/{id}")
-    public Map<Long, Genre> getGenreById(@PathVariable("id") long genreId) {
-        return filmService.getGenreById(genreId);
     }
  }
