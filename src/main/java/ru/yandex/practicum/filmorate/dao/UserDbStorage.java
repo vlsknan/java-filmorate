@@ -4,6 +4,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -24,13 +25,7 @@ public class UserDbStorage implements UserStorage {
     public Collection<User> getAll() throws SQLException {
         final String sqlQuery = "select USER_ID, USER_NAME, EMAIL, LOGIN, BIRTHDAY " +
                 "from USERS";
-        ResultSet rs = (ResultSet) jdbcTemplate.queryForList(sqlQuery);
-        final Collection<User> users = new ArrayList<>();
-        while (rs.next()) {
-            User user = makeUser(rs);
-            users.add(user);
-        }
-        return users;
+        return jdbcTemplate.query(sqlQuery, this::makeUser);
     }
 
     @Override
@@ -57,55 +52,32 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public User update(User user) {
-        String sqlQuery = "update USERS set " +
-                "USER_NAME = ?, LOGIN = ?, EMAIL = ?, BIRTHDAY = ? where USER_ID = ?";
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(connection -> {
-            PreparedStatement stmt = connection.prepareStatement(sqlQuery, new String[]{"USER_ID"});
-            stmt.setString(1, user.getName());
-            stmt.setString(2, user.getLogin());
-            stmt.setString(3, user.getEmail());
-            final LocalDate birthday = user.getBirthday();
-            if (birthday == null) {
-                stmt.setNull(4, Types.DATE);
-            } else {
-                stmt.setDate(4, Date.valueOf(birthday));
-            }
-            stmt.setLong(5, user.getId());
-            return stmt;
-        }, keyHolder);
-        return user;
+    public Optional<User> update(User user) {
+        String sqlQuery = "update USERS set USER_NAME = ?, LOGIN = ?, EMAIL = ?, BIRTHDAY = ? " +
+                "where USER_ID = ?";
+        return  jdbcTemplate.update(sqlQuery, user.getName(),
+                user.getLogin(), user.getEmail(), user.getBirthday(), user.getId()) == 0 ?
+                Optional.empty() :
+                Optional.of(user);
     }
 
     @Override
-    public User getById(long id) throws SQLException {
-        final String sqlQuery = "select USER_ID, LOGIN, BIRTHDAY, USER_NAME " +
+    public Optional<User> getById(long id) throws SQLException {
+        final String sqlQuery = "select USER_ID, EMAIL, LOGIN, BIRTHDAY, USER_NAME " +
                 "from USERS " +
                 "where USER_ID = ?";
-        ResultSet rs = (ResultSet) jdbcTemplate.queryForList(sqlQuery);
-        return makeUser(rs);
+        List<User> res = jdbcTemplate.query(sqlQuery, this::makeUser, id);
+        return res.size() == 0 ?
+                Optional.empty() :
+                Optional.of(res.get(0));
     }
 
-    @Override
-    public boolean contains(long id) throws SQLException {
-        final String sqlQuery = "select USER_ID, LOGIN, BIRTHDAY, USER_NAME " +
-                "from USERS " +
-                "where USER_ID = ?";
-        ResultSet rs = (ResultSet) jdbcTemplate.queryForList(sqlQuery);
-        if (makeUser(rs) != null) {
-            return true;
-        }
-        return false;
-    }
-
-    private static User makeUser(ResultSet rs) throws SQLException {
+    private User makeUser(ResultSet rs, int ruwNum) throws SQLException {
         return new User(rs.getLong("USER_ID"),
                 rs.getString("EMAIL"),
                 rs.getString("LOGIN"),
                 rs.getString("USER_NAME"),
-                rs.getDate("BIRTHDAY").toLocalDate(),
-                (Set<User>) rs.getObject("FRIEND_ID")
+                rs.getDate("BIRTHDAY").toLocalDate()
         );
     }
 }

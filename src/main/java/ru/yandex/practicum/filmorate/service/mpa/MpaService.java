@@ -1,19 +1,20 @@
 package ru.yandex.practicum.filmorate.service.mpa;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.MpaDbStorage;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
+import java.awt.desktop.OpenFilesEvent;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class MpaService {
     private final MpaDbStorage mpaDbStorage;
-
-    public MpaService(MpaDbStorage mpaDbStorage) {
-        this.mpaDbStorage = mpaDbStorage;
-    }
 
     public Collection<Mpa> getMpa() throws SQLException {
         return mpaDbStorage.getAllMpa();
@@ -21,6 +22,10 @@ public class MpaService {
 
     //получить жанр по id
     public Mpa getMpaById(long id) throws SQLException {
-        return mpaDbStorage.getMpaById(id);
+        Optional<Mpa> res = mpaDbStorage.getMpaById(id);
+        if (res.isPresent()) {
+            return res.get();
+        }
+        throw new NotFoundException(String.format("Рейтинг с id = %s не найден.", id));
     }
 }

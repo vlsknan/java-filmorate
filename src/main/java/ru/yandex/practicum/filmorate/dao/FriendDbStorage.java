@@ -17,49 +17,45 @@ public class FriendDbStorage {
     }
 
     public void addInFriend(long userId, long friendId) {
-        final String sqlQuery = "insert into USERS (FRIEND_ID) " +
-                "values (?) where USER_ID = ?";
-        ResultSet rs = (ResultSet) jdbcTemplate.queryForList(sqlQuery, friendId, userId);
+        final String sqlQuery = "insert into FRIENDS (USER_ID, FRIEND_ID) " +
+                "values (?, ?)";
+        jdbcTemplate.update(sqlQuery, userId, friendId);
     }
 
     public void deleteFromFriends(long userId, long friendId) {
         final String sqlQuery = "delete from FRIENDS" +
-                " where USER_ID = ?";
-        ResultSet rs = (ResultSet) jdbcTemplate.queryForList(sqlQuery, friendId, userId);
+                " where USER_ID = ? and FRIEND_ID = ?";
+        jdbcTemplate.update(sqlQuery, userId, friendId);
     }
 
-    public Set<User> getListFriends(long id) throws SQLException {
-        final String sqlQuery = "select FRIEND_ID from USERS " +
-                "where USER_ID = ?";
-        ResultSet rs = (ResultSet) jdbcTemplate.queryForList(sqlQuery, id);
-        final Set<User> listFriends = new HashSet<>();
-        while (rs.next()) {
-            User user = makeUser(rs);
-            listFriends.add(user);
-        }
-        return listFriends;
+    public List<User> getListFriends(long id) throws SQLException {
+        final String sqlQuery = "select U.USER_ID, U.USER_NAME, U.EMAIL, U.LOGIN, U.BIRTHDAY " +
+                "from USERS U " +
+                "where U.USER_ID in (select F.FRIEND_ID from FRIENDS F " +
+                "where F.USER_ID = ?)";
+        return jdbcTemplate.query(sqlQuery, this::makeUser, id);
     }
 
     public List<User> getListCommonFriends(long user1, long user2) throws SQLException {
-        final String sqlQuery = "select F.FRIEND_ID from USERS as U " +
-                "inner join FRIENDS as F on U.USER_ID = F.USER_ID " +
-                "where USER_ID = ?";
-        ResultSet rs = (ResultSet) jdbcTemplate.queryForList(sqlQuery, user1);
-        final List<User> users = new ArrayList<>();
-        while (rs.next()) {
-            User user = makeUser(rs);
-            users.add(user);
-        }
-        return users;
+        final String sqlQuery = "select U.USER_ID, U.USER_NAME, U.EMAIL, U.LOGIN, U.BIRTHDAY from USERS U " +
+                "where U.USER_ID in (select F.FRIEND_ID from FRIENDS F " +
+                                        "where F.USER_ID = ? " +
+                                        "intersect " +
+                                        "select F.FRIEND_ID from FRIENDS F " +
+                                        "where F.USER_ID = ?)";
+        return jdbcTemplate.query(sqlQuery, this::makeUser, user1, user2);
     }
 
-    private static User makeUser(ResultSet rs) throws SQLException {
+    //select U.USER_ID, U.USER_NAME, U.EMAIL, U.LOGIN, U.BIRTHDAY from USERS U " +
+    //                "join FRIENDS F1 on U.USER_ID = F1.FRIEND_ID" +
+    //                "join FRIENDS F2 on U.USER_ID = F2.FRIEND_ID" +
+    //                "where F1.USER_ID = ? and F2.USER_ID = ?
+    private User makeUser(ResultSet rs, int rowNum) throws SQLException {
         return new User(rs.getLong("USER_ID"),
                 rs.getString("EMAIL"),
                 rs.getString("LOGIN"),
                 rs.getString("USER_NAME"),
-                rs.getDate("BIRTHDAY").toLocalDate(),
-                (Set<User>) rs.getObject("FRIEND_ID")
+                rs.getDate("BIRTHDAY").toLocalDate()
         );
     }
 }

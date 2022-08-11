@@ -4,6 +4,7 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Optional;
 
 public interface GeneralService<T> {
     Collection<T> getAll() throws SQLException;
@@ -11,5 +12,4 @@ public interface GeneralService<T> {
     T create(T t) throws ValidationException;
     T update(T t) throws ValidationException, SQLException;
     void validate(T t) throws ValidationException;
-    void check(long id) throws SQLException;
 }

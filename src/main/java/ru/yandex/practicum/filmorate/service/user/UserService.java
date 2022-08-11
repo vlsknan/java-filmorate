@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.service.user;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.FriendDbStorage;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -16,82 +16,66 @@ import java.util.*;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class UserService implements GeneralService<User> {
     private final UserStorage userDbStorage;
     private final FriendDbStorage friendDbStorage;
 
-    @Autowired
-    public UserService(UserStorage userDbStorage, FriendDbStorage friendDbStorage) {
-        this.userDbStorage = userDbStorage;
-        this.friendDbStorage = friendDbStorage;
-    }
-
     //создать пользователя
     public User create(User user) throws ValidationException {
-        validate(user);
-        return userDbStorage.create(user);
+            validate(user);
+            return userDbStorage.create(user);
     }
 
     //обновить данные пользователя
     public User update(User user) throws ValidationException, SQLException {
-        check(user.getId());
         validate(user);
-        return userDbStorage.update(user);
+        Optional<User> res = userDbStorage.update(user);
+        if (res.isPresent()) {
+            return res.get();
+        }
+        throw new NotFoundException(String.format("Пользователь с id = %s не найден.", user.getId()));
     }
 
     //получить список пользователей
-    public Collection<User> getAll() throws SQLException {
-        return userDbStorage.getAll();
+    public Collection<User> getAll() {
+        try {
+            return userDbStorage.getAll();
+        } catch (Exception ex) {
+            throw new NotFoundException("Ошибка получения списка пользоваелей");
+        }
     }
 
     //получить пользователя по id
     public User getById(long userId) throws SQLException {
-        check(userId);
-        return userDbStorage.getById(userId);
+        Optional<User> resUser = userDbStorage.getById(userId);
+        if (resUser.isPresent()) {
+            return resUser.get();
+        }
+        throw new NotFoundException(String.format("Пользователь с id = %s не найден.", userId));
     }
 
     //добавить в друзья
     public void addInFriend(long userId, long friendId) throws SQLException {
-        check(userId);
-        check(friendId);
-
-//        User user = getById(userId);
-//        User friend = getById(friendId);
-//
-//        user.getFriends().add(getById(friendId));
-//        friend.getFriends().add(getById(userId));
-        friendDbStorage.addInFriend(userId, friendId);
-    }
-
-    //получить список друзей пользователя user
-    public Set<User> getListFriends(long userId) throws SQLException {
-        check(userId);
-        //User user = userDbStorage.getById(userId);
-        return friendDbStorage. getListFriends(userId);
+        try {
+            friendDbStorage.addInFriend(userId, friendId);
+        } catch (Exception ex) {
+            throw new NotFoundException("Ошибка при добавлении друга");
+        }
     }
 
     //удалить из друзей
     public void deleteFromFriends(long userId, long friendId) throws SQLException {
-        check(userId);
-        check(friendId);
-
-//        User user = getById(userId);
-//        User friend = getById(friendId);
-//
-//        user.getFriends().remove(friend);
-//        friend.getFriends().remove(user);
         friendDbStorage.deleteFromFriends(userId, friendId);
+    }
+
+    //получить список друзей пользователя user
+    public List<User> getListFriends(long userId) throws SQLException {
+        return friendDbStorage. getListFriends(userId);
     }
 
     //получить список общих друзей
     public List<User> getListCommonFriends(long user1, long user2) throws SQLException {
-        check(user1);
-        check(user2);
-
-//        List<User> commonFriends = new ArrayList<>(getById(user1).getFriends());
-//        List<User> fr = new ArrayList<>(getById(user2).getFriends());
-//        commonFriends.retainAll(fr);
-
         return friendDbStorage.getListCommonFriends(user1, user2);
     }
 
@@ -110,12 +94,6 @@ public class UserService implements GeneralService<User> {
         if (user.getBirthday().isAfter(LocalDate.now())) {
             log.debug("Дата рождения в будущем");
             throw new ValidationException("Дата рождения не может быть в будущем.");
-        }
-    }
-
-    public void check(long userId) throws SQLException {
-        if (!userDbStorage.contains(userId)) {
-            throw new NotFoundException(String.format("Пользователь с id=%s не найден", userId));
         }
     }
 }

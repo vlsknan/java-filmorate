@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class MpaDbStorage {
@@ -19,23 +20,22 @@ public class MpaDbStorage {
     }
 
     //получить рейтинг
-    public Collection<Mpa> getAllMpa() throws SQLException {
+    public Collection<Mpa> getAllMpa() {
         final String sqlQuery = "select * from MPA";
-        ResultSet rs = (ResultSet) jdbcTemplate.queryForList(sqlQuery);
-        final Collection<Mpa> listMpa = new ArrayList<>();
-        while (rs.next()) {
-            Mpa mpa = new Mpa(rs.getLong("MPA_ID"),
-                    rs.getString("MPA_NAME"));
-            listMpa.add(mpa);
-        }
-        return listMpa;
+        return jdbcTemplate.query(sqlQuery, this::makeMpa);
     }
 
     //получить рейтинг по id
-    public Mpa getMpaById(long id) throws SQLException {
+    public Optional<Mpa> getMpaById(long id) throws SQLException {
         final String sqlQuery = "select * from MPA where MPA_ID = ?";
-        ResultSet rs = (ResultSet) jdbcTemplate.queryForList(sqlQuery, id);
-        return new Mpa(rs.getLong("MPA_ID"),
+        List<Mpa> result = jdbcTemplate.query(sqlQuery, this::makeMpa, id);
+            return result.size() == 0 ?
+                    Optional.empty() :
+                    Optional.of(result.get(0));
+    }
+
+    private Mpa makeMpa(ResultSet rs, int rowNum) throws SQLException {
+        return new Mpa(rs.getInt("MPA_ID"),
                 rs.getString("MPA_NAME"));
     }
 }

@@ -54,7 +54,7 @@ public class UserController {
 
     //получить список друзей
     @GetMapping("/{id}/friends")
-    public Set<User> getListFriends(@PathVariable("id") long userId) throws SQLException {
+    public List<User> getListFriends(@PathVariable("id") long userId) throws SQLException {
         log.info("GET list friends user with id={}", userId);
         return userService.getListFriends(userId);
     }
