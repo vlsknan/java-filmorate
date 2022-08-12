@@ -8,11 +8,13 @@ import ru.yandex.practicum.filmorate.dao.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.service.GeneralService;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -32,7 +34,8 @@ public class FilmService implements GeneralService<Film> {
     public Film getById(long filmId) throws SQLException {
         Optional<Film> film = filmDbStorage.getById(filmId);
         if (film.isPresent()) {
-            genreDbStorage.loadFilmGenre(film.get());
+            List<Genre> genre = genreDbStorage.loadFilmGenre(film.get()).stream().collect(Collectors.toList());
+            film.get().setGenres(genre);
             return film.get();
         }
         throw new NotFoundException(String.format("Фильм с id = %s не найден.", filmId));
