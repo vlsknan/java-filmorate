@@ -19,15 +19,15 @@ public class LikeDbStorage {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public void addLike(long filmId, long userId) {
-        final String sqlQuery = "insert into LIKES (USER_ID) " +
-                "values (?) where FILM_ID = ?";
-        jdbcTemplate.update(sqlQuery, userId, filmId);
+    public boolean addLike(long filmId, long userId) {
+        final String sqlQuery = "insert into LIKES (USER_ID, FILM_ID) " +
+                "values (?, ?)";
+        return jdbcTemplate.update(sqlQuery, userId, filmId) != 0;
     }
 
-    public void deleteLike(long filmId, long userId) {
-        final String sqlQuery = "delete from LIKES" +
-                " where FILM_ID = ? and USER_ID = ?";
-       jdbcTemplate.update(sqlQuery, filmId, userId);
+    public boolean deleteLike(long filmId, long userId) {
+        final String sqlQuery = "delete from LIKES " +
+                "where FILM_ID = ? and USER_ID = ?";
+       return jdbcTemplate.update(sqlQuery, filmId, userId) != 0;
     }
 }

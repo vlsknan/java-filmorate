@@ -61,12 +61,16 @@ public class FilmService implements GeneralService<Film> {
 
     //добавить фильму лайк
     public void addLike(long filmId, long userId) throws SQLException {
-        likeDbStorage.addLike(filmId, userId);
+        if (!likeDbStorage.addLike(filmId, userId)) {
+            throw new NotFoundException("Ошибка при добавлении лайка.");
+        }
     }
 
     //удалить у фильма лайк
     public void deleteLike(long filmId, long userId) throws SQLException {
-        likeDbStorage.deleteLike(filmId, userId);
+        if (!likeDbStorage.deleteLike(filmId, userId)) {
+            throw new NotFoundException("Ошибка при удалении лайка.");
+        };
     }
 
     //получить список популярных фильмов (из первых count фильмов по количеству лайков)
