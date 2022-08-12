@@ -29,7 +29,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Collection<Film> getAll() {
+    public List<Film> getAll() {
         final String sqlQuery = "select F.FILM_ID, F.FILM_NAME, F.DESCRIPTION, F.RELEASE_DATE, " +
                 "F.DURATION, M.MPA_ID, M.MPA_NAME, FG.GENRE_ID " +
                 "from FILMS F " +

@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.service.film;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -27,7 +26,12 @@ public class FilmService implements GeneralService<Film> {
 
     //получить список всех фильмов
     public Collection<Film> getAll() {
-        return filmDbStorage.getAll();
+        List<Film> films = filmDbStorage.getAll();
+        for (Film film : films) {
+            Optional<Genre> genre = genreDbStorage.loadFilmGenre(film);
+            film.setGenres(genre.stream().collect(Collectors.toList()));
+        }
+        return films;
     }
 
     //получить фильм по id
@@ -80,7 +84,8 @@ public class FilmService implements GeneralService<Film> {
     public List<Film> getListPopularFilm(long count) {
         List<Film> films =  filmDbStorage.getListPopularFilm(count);
         for (Film film : films) {
-            genreDbStorage.loadFilmGenre(film);
+            Optional<Genre> genre = genreDbStorage.loadFilmGenre(film);
+            film.setGenres(genre.stream().collect(Collectors.toList()));
         }
         return films;
     }

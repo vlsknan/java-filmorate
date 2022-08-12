@@ -25,14 +25,14 @@ public class GenreService {
 
     //получить жанр по id
     public Genre getGenreById(long id) throws SQLException {
-//        Optional<Genre> resGenre = genreDbStorage.getGenreById(id);
-//        if (resGenre.isPresent()) {
-//            return resGenre.get();
-//        }
-        List<Genre> resGenre = genreDbStorage.getGenreById(id);
-        if (resGenre.size() != 0) {
-            return resGenre.get(0);
+        Optional<Genre> resGenre = genreDbStorage.getGenreById(id);
+        if (resGenre.isPresent()) {
+            return resGenre.get();
         }
+//        List<Genre> resGenre = genreDbStorage.getGenreById(id);
+//        if (resGenre.size() != 0) {
+//            return resGenre.get(0);
+//        }
         throw new NotFoundException(String.format("Жанр с id = %s не найден.", id));
     }
 }

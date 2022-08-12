@@ -74,7 +74,7 @@ public class FilmController {
 
     //получить список из первых count фильмов по количеству лайков
     @GetMapping("/popular")
-    public Collection<Film> getListPopularFilm(@RequestParam(defaultValue = "10") int count) throws SQLException {
+    public Collection<Film> getListPopularFilm(@RequestParam(defaultValue = "10") int count) {
         log.info("GET list popular film(size = count)");
         return filmService.getListPopularFilm(count);
     }

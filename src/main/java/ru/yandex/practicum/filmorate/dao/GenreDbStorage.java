@@ -26,10 +26,12 @@ public class GenreDbStorage {
     }
 
     //получить жанр по id
-    public List<Genre> getGenreById(long id) throws SQLException {
+    public Optional<Genre> getGenreById(long id) throws SQLException {
         final String sqlQuery = "select * from GENRES where GENRE_ID = ?";
         List<Genre> res = jdbcTemplate.query(sqlQuery, this::makeGenre, id);
-        return res;
+        return res.size() == 0 ?
+                Optional.empty() :
+                Optional.of(res.get(0));
     }
 
         public void setFilmGenre(Film film) {
