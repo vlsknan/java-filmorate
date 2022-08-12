@@ -103,9 +103,8 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Optional<Film> getById(long id) throws SQLException {
         final String sqlQuery = "select F.FILM_ID, F.FILM_NAME, F.DESCRIPTION, F.DURATION, " +
-                "F.RELEASE_DATE, M.MPA_ID, M.MPA_NAME, FG.GENRE_ID from FILMS F " +
+                "F.RELEASE_DATE, M.MPA_ID, M.MPA_NAME from FILMS F " +
                 "join MPA M on M.MPA_ID = F.MPA_ID " +
-                "join FILMS_GENRES FG on F.FILM_ID = FG.FILM_ID " +
                 "where F.FILM_ID = ?";
         List<Film> res = jdbcTemplate.query(sqlQuery, this::makeFilm, id);
         return res.size() == 0 ?
@@ -132,7 +131,7 @@ public class FilmDbStorage implements FilmStorage {
                 rs.getDate("RELEASE_DATE").toLocalDate(),
                 rs.getInt("DURATION"),
                 new Mpa(rs.getInt("MPA_ID"), rs.getString("MPA_NAME")),
-                new ArrayList<>(rs.getInt("GENRE_ID"))
+                new ArrayList<>()
         );
 //        return Film.builder()
 //                .id(rs.getInt("film_id"))
