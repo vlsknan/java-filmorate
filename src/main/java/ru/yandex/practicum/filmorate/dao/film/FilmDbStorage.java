@@ -29,9 +29,8 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public List<Film> getAll() {
         final String sqlQuery = "select F.FILM_ID, F.FILM_NAME, F.DESCRIPTION, F.RELEASE_DATE, " +
-                "F.DURATION, M.MPA_ID, M.MPA_NAME, FG.GENRE_ID " +
+                "F.DURATION, M.MPA_ID, M.MPA_NAME " +
                 "from FILMS F " +
-                "join FILMS_GENRES FG on F.FILM_ID = FG.FILM_ID " +
                 "join MPA M on M.MPA_ID = F.MPA_ID";
         return jdbcTemplate.query(sqlQuery, this::makeFilm);
     }

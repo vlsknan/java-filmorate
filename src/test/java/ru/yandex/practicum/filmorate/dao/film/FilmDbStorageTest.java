@@ -2,7 +2,10 @@ package ru.yandex.practicum.filmorate.dao.film;
 
 import lombok.RequiredArgsConstructor;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,10 +23,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class FilmDbStorageTest {
     private final FilmDbStorage filmDbStorage;
 
     @Test
+    @Order(10)
     void createFilmTest() throws ValidationException {
         Film film = new Film(1, "test_name", "description",
                 LocalDate.of(2000, 05, 02), 30, new Mpa(1, "G"),
@@ -34,6 +39,7 @@ class FilmDbStorageTest {
     }
 
     @Test
+    @Order(20)
     void getById() throws SQLException {
         Optional<Film> userOptional = filmDbStorage.getById(1);
         Assertions.assertThat(userOptional).isPresent()
