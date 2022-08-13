@@ -38,30 +38,27 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film create(Film film) throws ValidationException {
-        try {
-            final String sqlQuery = "insert into FILMS (FILM_NAME, DESCRIPTION, RELEASE_DATE, " +
-                    "DURATION, MPA_ID) values (?, ?, ?, ?, ?)";
+        final String sqlQuery = "insert into FILMS (FILM_NAME, DESCRIPTION, RELEASE_DATE, " +
+                "DURATION, MPA_ID) values (?, ?, ?, ?, ?)";
 
-            KeyHolder keyHolder = new GeneratedKeyHolder();
-            jdbcTemplate.update(connection -> {
-                PreparedStatement stmt = connection.prepareStatement(sqlQuery, new String[]{"FILM_ID"});
-                stmt.setString(1, film.getName());
-                stmt.setString(2, film.getDescription());
-                final LocalDate releaseDate = film.getReleaseDate();
-                if (releaseDate == null) {
-                    stmt.setNull(3, Types.DATE);
-                } else {
-                    stmt.setDate(3, Date.valueOf(releaseDate));
-                }
-                stmt.setInt(4, film.getDuration());
-                stmt.setInt(5, film.getMpa().getId());
-                return stmt;
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement stmt = connection.prepareStatement(sqlQuery, new String[]{"FILM_ID"});
+            stmt.setString(1, film.getName());
+            stmt.setString(2, film.getDescription());
+            final LocalDate releaseDate = film.getReleaseDate();
+            if (releaseDate == null) {
+                stmt.setNull(3, Types.DATE);
+            } else {
+                stmt.setDate(3, Date.valueOf(releaseDate));
+            }
+            stmt.setInt(4, film.getDuration());
+            stmt.setInt(5, film.getMpa().getId());
+            return stmt;
             }, keyHolder);
-            film.setId((keyHolder.getKey()).longValue());
+            //film.setId((keyHolder.getKey()).longValue());
+        film.setId(Objects.requireNonNull(keyHolder.getKey()).intValue());
             return film;
-        } catch (Exception ex) {
-            throw new ValidationException("Получены некорректные данные");
-        }
     }
 
     @Override
