@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.dao;
+package ru.yandex.practicum.filmorate.dao.film;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -21,11 +21,9 @@ import java.util.*;
 @Component
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
-    private final GenreDbStorage genreDbStorage;
 
-    public FilmDbStorage(JdbcTemplate jdbcTemplate, GenreDbStorage genreDbStorage) {
+    public FilmDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.genreDbStorage = genreDbStorage;
     }
 
     @Override
@@ -72,29 +70,10 @@ public class FilmDbStorage implements FilmStorage {
             final String sqlQuery = "update FILMS set FILM_NAME = ?, DESCRIPTION = ?, RELEASE_DATE = ?, " +
                     " DURATION = ?, MPA_ID = ? " +
                     "where FILM_ID = ?";
-
             return  jdbcTemplate.update(sqlQuery, film.getName(), film.getDescription(), film.getReleaseDate(),
                     film.getDuration(), film.getMpa().getId(), film.getId()) == 0 ?
                     Optional.empty() :
                     Optional.of(film);
-//            KeyHolder keyHolder = new GeneratedKeyHolder();
-//            jdbcTemplate.update(connection -> {
-//                PreparedStatement stmt = connection.prepareStatement(sqlQuery, new String[]{"FILM_ID"});
-//                stmt.setString(1, film.getName());
-//                stmt.setString(2, film.getDescription());
-//                final LocalDate releaseDate = film.getReleaseDate();
-//                if (releaseDate == null) {
-//                    stmt.setNull(3, Types.DATE);
-//                } else {
-//                    stmt.setDate(3, Date.valueOf(releaseDate));
-//                }
-//                stmt.setInt(4, film.getDuration());
-//                stmt.setInt(5, film.getMpa().getId());
-//                stmt.setLong(6, film.getId());
-//                return stmt;
-//            }, keyHolder);
-//            film.setId(keyHolder.getKey().longValue());
-//            return Optional.of(film);
         } catch (Exception ex) {
             throw new NotFoundException("Получены некорректные данные.");
         }
@@ -131,17 +110,7 @@ public class FilmDbStorage implements FilmStorage {
                 rs.getDate("RELEASE_DATE").toLocalDate(),
                 rs.getInt("DURATION"),
                 new Mpa(rs.getInt("MPA_ID"), rs.getString("MPA_NAME")),
-                new ArrayList<>()
+                new HashSet<>()
         );
-//        return Film.builder()
-//                .id(rs.getInt("film_id"))
-//                .name(rs.getString("film_name"))
-//                .description(rs.getString("description"))
-//                .releaseDate(LocalDate.parse(rs.getString("release_date"), DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-//                .duration(rs.getInt("duration"))
-//                .mpa(Mpa.builder()
-//                        .id(rs.getInt("MPA_ID"))
-//                        .name(rs.getString("MPA_NAME")).build())
-//                .genres(genreDbStorage.getGenreById(rs.getInt("genre_id"))).build();
     }
 }

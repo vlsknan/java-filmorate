@@ -1,10 +1,9 @@
-package ru.yandex.practicum.filmorate.dao;
+package ru.yandex.practicum.filmorate.dao.user;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -22,7 +21,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public Collection<User> getAll() throws SQLException {
+    public Collection<User> getAll() {
         final String sqlQuery = "select USER_ID, USER_NAME, EMAIL, LOGIN, BIRTHDAY " +
                 "from USERS";
         return jdbcTemplate.query(sqlQuery, this::makeUser);

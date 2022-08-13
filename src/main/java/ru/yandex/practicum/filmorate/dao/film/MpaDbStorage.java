@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.dao;
+package ru.yandex.practicum.filmorate.dao.film;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -6,7 +6,6 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -26,7 +25,7 @@ public class MpaDbStorage {
     }
 
     //получить рейтинг по id
-    public Optional<Mpa> getMpaById(long id) throws SQLException {
+    public Optional<Mpa> getMpaById(long id) {
         final String sqlQuery = "select * from MPA where MPA_ID = ?";
         List<Mpa> result = jdbcTemplate.query(sqlQuery, this::makeMpa, id);
             return result.size() == 0 ?

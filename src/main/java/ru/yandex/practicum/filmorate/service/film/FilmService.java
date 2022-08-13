@@ -3,7 +3,9 @@ package ru.yandex.practicum.filmorate.service.film;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dao.*;
+import ru.yandex.practicum.filmorate.dao.film.FilmDbStorage;
+import ru.yandex.practicum.filmorate.dao.film.GenreDbStorage;
+import ru.yandex.practicum.filmorate.dao.LikeDbStorage;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -13,7 +15,6 @@ import ru.yandex.practicum.filmorate.service.GeneralService;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -28,22 +29,21 @@ public class FilmService implements GeneralService<Film> {
     public Collection<Film> getAll() {
         List<Film> films = filmDbStorage.getAll();
         for (Film film : films) {
-            Optional<Genre> genre = genreDbStorage.loadFilmGenre(film);
-            film.setGenres(genre.stream().collect(Collectors.toList()));
+            Set<Genre> genre = genreDbStorage.loadFilmGenre(film);
+            film.setGenres(genre);
         }
         return films;
     }
 
     //получить фильм по id
     public Film getById(long filmId) throws SQLException {
-        Optional<Film> film = filmDbStorage.getById(filmId);
-        if (film.isPresent()) {
-            List<Genre> genre = genreDbStorage.loadFilmGenre(film.get()).stream().collect(Collectors.toList());
-            film.get().setGenres(genre);
-            return film.get();
+        Optional<Film> filmById = filmDbStorage.getById(filmId);
+        if (filmById.isPresent()) {
+            Film film = filmById.get();
+            film.setGenres(genreDbStorage.loadFilmGenre(film));
+            return film;
         }
         throw new NotFoundException(String.format("Фильм с id = %s не найден.", filmId));
-
     }
 
     //создать фильм
@@ -63,11 +63,10 @@ public class FilmService implements GeneralService<Film> {
             return res.get();
         }
         throw new NotFoundException(String.format("Фильм с id = %s не найден.", film.getId()));
-
     }
 
     //добавить фильму лайк
-    public void addLike(long filmId, long userId) throws SQLException {
+    public void addLike(long filmId, long userId) {
         if (!likeDbStorage.addLike(filmId, userId)) {
             throw new NotFoundException("Ошибка при добавлении лайка.");
         }
@@ -84,8 +83,8 @@ public class FilmService implements GeneralService<Film> {
     public List<Film> getListPopularFilm(long count) {
         List<Film> films =  filmDbStorage.getListPopularFilm(count);
         for (Film film : films) {
-            Optional<Genre> genre = genreDbStorage.loadFilmGenre(film);
-            film.setGenres(genre.stream().collect(Collectors.toList()));
+            Set<Genre> genre = genreDbStorage.loadFilmGenre(film);
+            film.setGenres(genre);
         }
         return films;
     }

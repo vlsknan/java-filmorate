@@ -2,12 +2,10 @@ package ru.yandex.practicum.filmorate.service.mpa;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dao.MpaDbStorage;
+import ru.yandex.practicum.filmorate.dao.film.MpaDbStorage;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
-import java.awt.desktop.OpenFilesEvent;
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -16,12 +14,12 @@ import java.util.Optional;
 public class MpaService {
     private final MpaDbStorage mpaDbStorage;
 
-    public Collection<Mpa> getMpa() throws SQLException {
+    public Collection<Mpa> getMpa() {
         return mpaDbStorage.getAllMpa();
     }
 
     //получить жанр по id
-    public Mpa getMpaById(long id) throws SQLException {
+    public Mpa getMpaById(long id) {
         Optional<Mpa> res = mpaDbStorage.getMpaById(id);
         if (res.isPresent()) {
             return res.get();

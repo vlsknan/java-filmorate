@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.dao;
+package ru.yandex.practicum.filmorate.dao.film;
 
 import lombok.RequiredArgsConstructor;
 import org.assertj.core.api.Assertions;
@@ -6,7 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.dao.film.MpaDbStorage;
+import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.sql.SQLException;
 import java.util.Optional;
@@ -14,15 +15,15 @@ import java.util.Optional;
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-class GenreDbStorageTest {
-    private final GenreDbStorage genreDbStorage;
+class MpaDbStorageTest {
+    private final MpaDbStorage mpaDbStorage;
 
     @Test
     void getById() throws SQLException {
-        Optional<Genre> genreOptional = genreDbStorage.getGenreById(1);
-        Assertions.assertThat(genreOptional).isPresent()
-                .hasValueSatisfying(genre -> Assertions.assertThat(genre)
-                        .hasFieldOrPropertyWithValue("name", "Комедия"));
+        Optional<Mpa> mpaOptional = mpaDbStorage.getMpaById(1);
+        Assertions.assertThat(mpaOptional).isPresent()
+                .hasValueSatisfying(mpa -> Assertions.assertThat(mpa)
+                        .hasFieldOrPropertyWithValue("name", "G"));
     }
 
 }

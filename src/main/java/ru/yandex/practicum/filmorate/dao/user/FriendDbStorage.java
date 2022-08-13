@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.dao;
+package ru.yandex.practicum.filmorate.dao.user;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -46,10 +46,6 @@ public class FriendDbStorage {
         return jdbcTemplate.query(sqlQuery, this::makeUser, user1, user2);
     }
 
-    //select U.USER_ID, U.USER_NAME, U.EMAIL, U.LOGIN, U.BIRTHDAY from USERS U " +
-    //                "join FRIENDS F1 on U.USER_ID = F1.FRIEND_ID" +
-    //                "join FRIENDS F2 on U.USER_ID = F2.FRIEND_ID" +
-    //                "where F1.USER_ID = ? and F2.USER_ID = ?
     private User makeUser(ResultSet rs, int rowNum) throws SQLException {
         return new User(rs.getLong("USER_ID"),
                 rs.getString("EMAIL"),
