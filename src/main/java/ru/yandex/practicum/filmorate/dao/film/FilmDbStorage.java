@@ -55,8 +55,7 @@ public class FilmDbStorage implements FilmStorage {
             stmt.setInt(5, film.getMpa().getId());
             return stmt;
             }, keyHolder);
-            //film.setId((keyHolder.getKey()).longValue());
-        film.setId(Objects.requireNonNull(keyHolder.getKey()).intValue());
+            film.setId(Objects.requireNonNull(keyHolder.getKey()).intValue());
             return film;
     }
 

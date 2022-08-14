@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.dao.film;
 
 import lombok.RequiredArgsConstructor;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -16,8 +15,10 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
@@ -29,7 +30,7 @@ class FilmDbStorageTest {
 
     @Test
     @Order(10)
-    void createFilmTest() throws ValidationException {
+    void createAndGetAllFilmTest() throws ValidationException {
         Film film = new Film(1, "test_name", "description",
                 LocalDate.of(2000, 05, 02), 30, new Mpa(1, "G"),
                 new HashSet<>());
@@ -40,10 +41,38 @@ class FilmDbStorageTest {
 
     @Test
     @Order(20)
-    void getById() throws SQLException {
+    void getByIdTest() throws SQLException {
         Optional<Film> userOptional = filmDbStorage.getById(1);
-        Assertions.assertThat(userOptional).isPresent()
-                .hasValueSatisfying(user -> Assertions.assertThat(user)
+        assertThat(userOptional).isPresent()
+                .hasValueSatisfying(film -> assertThat(film)
                         .hasFieldOrPropertyWithValue("name", "test_name"));
+    }
+
+    @Test
+    @Order(30)
+    void getPopularTest() throws ValidationException {
+        Film film1 = new Film(2, "test_film", "description",
+                LocalDate.of(2000, 05, 02), 30, new Mpa(1, "G"),
+                new HashSet<>());
+        filmDbStorage.create(film1);
+
+        List<Film> film = filmDbStorage.getListPopularFilm(1);
+        assertEquals(1, film.size());
+    }
+
+    @Test
+    @Order(40)
+    void updateTest() throws ValidationException, SQLException {
+        Film film1 = new Film(1, "test324_film", "description2",
+                LocalDate.of(2000, 05, 02), 30, new Mpa(1, "G"),
+                new HashSet<>());
+
+        filmDbStorage.update(film1);
+        Optional<Film> filmOptional = filmDbStorage.getById(1);
+        assertThat(filmOptional)
+                .isPresent()
+                .hasValueSatisfying(film ->
+                        assertThat(film).hasFieldOrPropertyWithValue("name",
+                                "test324_film"));
     }
 }

@@ -46,7 +46,7 @@ public class UserDbStorage implements UserStorage {
             }
             return stmt;
         }, keyHolder);
-        user.setId(keyHolder.getKey().longValue());
+        user.setId(Objects.requireNonNull(keyHolder.getKey()).intValue());
         return user;
     }
 
