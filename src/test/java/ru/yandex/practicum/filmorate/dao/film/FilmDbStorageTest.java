@@ -32,18 +32,19 @@ class FilmDbStorageTest {
     @Order(10)
     void createAndGetAllFilmTest() throws ValidationException {
         Film film = new Film(1, "test_name", "description",
-                LocalDate.of(2000, 05, 02), 30, new Mpa(1, "G"),
+                LocalDate.of(2001, 04, 25), 30, new Mpa(1, "G"),
                 new HashSet<>());
 
         filmDbStorage.create(film);
-        assertEquals(1, filmDbStorage.getAll().size());
+        // размер 2, т.к. в таблице films же есть фильм из GenreDbStorageTest
+        assertEquals(2, filmDbStorage.getAll().size());
     }
 
     @Test
     @Order(20)
     void getByIdTest() throws SQLException {
-        Optional<Film> userOptional = filmDbStorage.getById(1);
-        assertThat(userOptional).isPresent()
+        Optional<Film> filmOptional = filmDbStorage.getById(2);
+        assertThat(filmOptional).isPresent()
                 .hasValueSatisfying(film -> assertThat(film)
                         .hasFieldOrPropertyWithValue("name", "test_name"));
     }

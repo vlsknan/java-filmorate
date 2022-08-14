@@ -47,8 +47,8 @@ class UserDbStorageTest {
     @Order(30)
     @Test
     void updateTest() throws SQLException {
-        User user = new User(1, "test2@email","test2_login", "test_user",
-                LocalDate.of(2000,05,02));
+        User user = new User(1, "test25326@email","test3452_login", "test_user",
+                LocalDate.of(2005,02,12));
 
         userDbStorage.update(user);
         Optional<User> userOptional = userDbStorage.getById(1);
