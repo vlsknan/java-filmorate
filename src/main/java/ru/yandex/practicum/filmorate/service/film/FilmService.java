@@ -97,8 +97,18 @@ public class FilmService implements GeneralService<Film> {
     }
 
     //получить список популярных фильмов (из первых count фильмов по количеству лайков)
-    public List<Film> getListPopularFilm(long count) {
-        List<Film> films =  filmDbStorage.getListPopularFilm(count);
+    public List<Film> getListPopularFilm(int count, long genreId, int year) {
+        List<Film> films = null;
+        if (genreId == 0 && year == 0) {
+            films = filmDbStorage.getListPopularFilm(count);
+        } else if (genreId != 0 && year == 0) {
+            films = filmDbStorage.getListPopularFilmSortGenre(count, genreId);
+        } else if (year != 0 && genreId == 0) {
+            films = filmDbStorage.getListPopularFilmSortYear(count, year);
+        } else if (genreId != 0 && year != 0) {
+            films = filmDbStorage.getListPopularFilmSortGenreAndYear(count, genreId, year);
+        }
+
         for (Film film : films) {
             Set<Genre> genre = genreDbStorage.loadFilmGenre(film);
             film.setGenres(genre);

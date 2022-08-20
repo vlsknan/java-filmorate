@@ -103,6 +103,48 @@ public class FilmDbStorage implements FilmStorage {
         return jdbcTemplate.query(sqlQuery, this::makeFilm, count);
     }
 
+    public List<Film> getListPopularFilmSortGenre(int count, long genreId) {
+        final String sql = "SELECT F.FILM_ID, F.FILM_NAME, F.DESCRIPTION, " +
+                "F.RELEASE_DATE, F.DURATION, M.MPA_ID, M.MPA_NAME, G.GENRE_ID " +
+                "FROM FILMS F " +
+                "JOIN MPA M ON M.MPA_ID = F.MPA_ID " +
+                "LEFT JOIN FILMS_GENRES G ON F.FILM_ID = G.FILM_ID " +
+                "LEFT JOIN LIKES L ON F.FILM_ID = L.FILM_ID " +
+                "WHERE G.GENRE_ID = ? " +
+                "GROUP BY F.FILM_ID, G.GENRE_ID ORDER BY COUNT(L.USER_ID) DESC " +
+                "LIMIT ?";
+        Set<Film> films = new HashSet<>(jdbcTemplate.query(sql, this::makeFilm, genreId, count));
+        return new ArrayList<>(films);
+    }
+
+    public List<Film> getListPopularFilmSortYear(int count, int year) {
+        final String sql = "SELECT F.FILM_ID, F.FILM_NAME, F.DESCRIPTION, " +
+                "F.RELEASE_DATE, F.DURATION, M.MPA_ID, M.MPA_NAME, G.GENRE_ID " +
+                "FROM FILMS F " +
+                "JOIN MPA M ON M.MPA_ID = F.MPA_ID " +
+                "LEFT JOIN FILMS_GENRES G ON F.FILM_ID = G.FILM_ID " +
+                "LEFT JOIN LIKES L ON F.FILM_ID = L.FILM_ID " +
+                "WHERE YEAR(F.RELEASE_DATE) = ? " +
+                "GROUP BY F.FILM_ID, G.GENRE_ID ORDER BY COUNT(L.USER_ID) DESC " +
+                "LIMIT ?";
+        Set<Film> films = new HashSet<>(jdbcTemplate.query(sql, this::makeFilm, year, count));
+        return new ArrayList<>(films);
+    }
+
+    public List<Film> getListPopularFilmSortGenreAndYear(int count, long genreId, int year) {
+        final String sql = "SELECT F.FILM_ID, F.FILM_NAME, F.DESCRIPTION, " +
+                "F.RELEASE_DATE, F.DURATION, M.MPA_ID, M.MPA_NAME, G.GENRE_ID " +
+                "FROM FILMS F " +
+                "JOIN MPA M ON M.MPA_ID = F.MPA_ID " +
+                "LEFT JOIN FILMS_GENRES G ON F.FILM_ID = G.FILM_ID " +
+                "LEFT JOIN LIKES L ON F.FILM_ID = L.FILM_ID " +
+                "WHERE G.GENRE_ID = ? AND YEAR(F.RELEASE_DATE) = ? " +
+                "GROUP BY F.FILM_ID, G.GENRE_ID ORDER BY COUNT(L.USER_ID) DESC " +
+                "LIMIT ?";
+        Set<Film> films = new HashSet<>(jdbcTemplate.query(sql, this::makeFilm, genreId, year, count));
+        return new ArrayList<>(films);
+    }
+
     public List<Film> getListFilmsDirector(long id, String sort) {
         List<Film> films = null;
         switch (sort) {

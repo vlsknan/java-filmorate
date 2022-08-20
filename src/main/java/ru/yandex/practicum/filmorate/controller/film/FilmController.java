@@ -74,9 +74,11 @@ public class FilmController {
 
     //получить список из первых count фильмов по количеству лайков
     @GetMapping("/popular")
-    public Collection<Film> getListPopularFilm(@RequestParam(defaultValue = "10") int count) {
+    public Collection<Film> getListPopularFilm(@RequestParam(defaultValue = "10") int count,
+                                               @RequestParam(defaultValue = "0") long genreId,
+                                               @RequestParam(defaultValue = "0") int year) {
         log.info("GET list popular film(size = count)");
-        return filmService.getListPopularFilm(count);
+        return filmService.getListPopularFilm(count, genreId, year);
     }
 
     //список фильмов режиссера
