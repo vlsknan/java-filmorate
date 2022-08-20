@@ -13,5 +13,5 @@ public interface Storage<T> {
     T create(T t) throws ValidationException;
     Optional<T> update(T t) throws ValidationException;
     Optional<T> getById(long id) throws SQLException;
-//    boolean contains(long id) throws SQLException;
+    void delete(long id);
 }

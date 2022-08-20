@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -20,4 +21,5 @@ public class Film {
     private int duration;
     private Mpa mpa;
     private Set<Genre> genres;
+    private List<Director> directors;
 }

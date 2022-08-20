@@ -28,7 +28,7 @@ public class FilmController {
 
     //получить список всех фильмов
     @GetMapping
-    public Collection<Film> getFilms() throws SQLException {
+    public Collection<Film> getFilms() {
         log.info("GET list films all");
         return filmService.getAll();
     }
@@ -77,5 +77,13 @@ public class FilmController {
     public Collection<Film> getListPopularFilm(@RequestParam(defaultValue = "10") int count) {
         log.info("GET list popular film(size = count)");
         return filmService.getListPopularFilm(count);
+    }
+
+    //список фильмов режиссера
+    @GetMapping("/director/{directorId}")
+    public List<Film> getListFilmsDirector(@PathVariable long directorId,
+                                           @RequestParam String sortBy) throws SQLException {
+        log.info("GET list films director sortBy (year/likes)");
+        return filmService.getListFilmsDirector(directorId, sortBy);
     }
  }
