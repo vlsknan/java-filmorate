@@ -22,12 +22,14 @@ public class UserService implements GeneralService<User> {
     private final FriendDbStorage friendDbStorage;
 
     //создать пользователя
+    @Override
     public User create(User user) throws ValidationException {
             validate(user);
             return userDbStorage.create(user);
     }
 
     //обновить данные пользователя
+    @Override
     public User update(User user) throws ValidationException, SQLException {
         validate(user);
         Optional<User> res = userDbStorage.update(user);
@@ -38,6 +40,7 @@ public class UserService implements GeneralService<User> {
     }
 
     //получить список пользователей
+    @Override
     public Collection<User> getAll() {
         try {
             return userDbStorage.getAll();
@@ -47,12 +50,18 @@ public class UserService implements GeneralService<User> {
     }
 
     //получить пользователя по id
+    @Override
     public User getById(long userId) throws SQLException {
         Optional<User> resUser = userDbStorage.getById(userId);
         if (resUser.isPresent()) {
             return resUser.get();
         }
         throw new NotFoundException(String.format("Пользователь с id = %s не найден.", userId));
+    }
+
+    @Override
+    public void delete(long id) {
+        userDbStorage.delete(id);
     }
 
     //добавить в друзья

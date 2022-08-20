@@ -29,6 +29,20 @@ create table IF NOT EXISTS FILMS_GENRES
         primary key (GENRE_ID, FILM_ID)
 );
 
+create table if not exists directors
+(
+    director_id long primary key auto_increment,
+    name        varchar(50) not null
+);
+
+create table if not exists films_directors
+(
+    film_id long references FILMS(FILM_ID) on delete cascade,
+    director_id long references directors(director_id) on delete cascade,
+    constraint films_directors_PK
+        primary key (film_id, director_id)
+);
+
 create table IF NOT EXISTS USERS
 (
     USER_ID   LONG primary key auto_increment,

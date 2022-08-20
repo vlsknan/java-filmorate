@@ -71,6 +71,12 @@ public class UserDbStorage implements UserStorage {
                 Optional.of(res.get(0));
     }
 
+    @Override
+    public void delete(long id) {
+        final String sql = "delete from users where user_id = ?";
+        jdbcTemplate.update(sql, id);
+    }
+
     private User makeUser(ResultSet rs, int ruwNum) throws SQLException {
         return new User(rs.getLong("USER_ID"),
                 rs.getString("EMAIL"),
