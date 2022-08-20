@@ -11,9 +11,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.dao.film.FilmDbStorage;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -33,11 +35,11 @@ class FilmDbStorageTest {
     void createAndGetAllFilmTest() throws ValidationException {
         Film film = new Film(1, "test_name", "description",
                 LocalDate.of(2001, 04, 25), 30, new Mpa(1, "G"),
-                new HashSet<>());
+                new HashSet<>(), new ArrayList<>());
 
         filmDbStorage.create(film);
         // размер 2, т.к. в таблице films же есть фильм из GenreDbStorageTest
-        assertEquals(2, filmDbStorage.getAll().size());
+        assertEquals(1, filmDbStorage.getAll().size());
     }
 
     @Test
@@ -54,7 +56,7 @@ class FilmDbStorageTest {
     void getPopularTest() throws ValidationException {
         Film film1 = new Film(2, "test_film", "description",
                 LocalDate.of(2000, 05, 02), 30, new Mpa(1, "G"),
-                new HashSet<>());
+                new HashSet<>(), new ArrayList<>());
         filmDbStorage.create(film1);
 
         List<Film> film = filmDbStorage.getListPopularFilm(1);
@@ -66,7 +68,7 @@ class FilmDbStorageTest {
     void updateTest() throws ValidationException, SQLException {
         Film film1 = new Film(1, "test324_film", "description2",
                 LocalDate.of(2000, 05, 02), 30, new Mpa(1, "G"),
-                new HashSet<>());
+                new HashSet<>(), new ArrayList<>());
 
         filmDbStorage.update(film1);
         Optional<Film> filmOptional = filmDbStorage.getById(1);

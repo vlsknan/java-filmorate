@@ -3,10 +3,10 @@ package ru.yandex.practicum.filmorate.service.film;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dao.film.DirectorDbStorage;
-import ru.yandex.practicum.filmorate.dao.film.FilmDbStorage;
-import ru.yandex.practicum.filmorate.dao.film.GenreDbStorage;
-import ru.yandex.practicum.filmorate.dao.LikeDbStorage;
+import ru.yandex.practicum.filmorate.storage.dao.director.DirectorDbStorage;
+import ru.yandex.practicum.filmorate.storage.dao.film.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storage.dao.film.GenreDbStorage;
+import ru.yandex.practicum.filmorate.storage.dao.LikeDbStorage;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Director;
@@ -97,8 +97,18 @@ public class FilmService implements GeneralService<Film> {
     }
 
     //получить список популярных фильмов (из первых count фильмов по количеству лайков)
-    public List<Film> getListPopularFilm(long count) {
-        List<Film> films =  filmDbStorage.getListPopularFilm(count);
+    public List<Film> getListPopularFilm(int count, long genreId, int year) {
+        List<Film> films = null;
+        if (genreId == 0 && year == 0) {
+            films = filmDbStorage.getListPopularFilm(count);
+        } else if (genreId != 0 && year == 0) {
+            films = filmDbStorage.getListPopularFilmSortGenre(count, genreId);
+        } else if (year != 0 && genreId == 0) {
+            films = filmDbStorage.getListPopularFilmSortYear(count, year);
+        } else if (genreId != 0 && year != 0) {
+            films = filmDbStorage.getListPopularFilmSortGenreAndYear(count, genreId, year);
+        }
+
         for (Film film : films) {
             Set<Genre> genre = genreDbStorage.loadFilmGenre(film);
             film.setGenres(genre);
@@ -111,6 +121,18 @@ public class FilmService implements GeneralService<Film> {
             throw new NotFoundException(String.format("Режиссер с id = %s не найден", id));
         }
         List<Film> films = filmDbStorage.getListFilmsDirector(id, sort);
+        for (Film film : films) {
+            film.setGenres(genreDbStorage.loadFilmGenre(film));
+            film.setDirectors(directorDbStorage.loadFilmDirector(film));
+        }
+        return films;
+    }
+
+    public List<Film> findPopularFilmsByTitleOrDirector(String query, String by) {
+        List<Film> films = filmDbStorage.findPopularFilmsByTitleOrDirector(query.toLowerCase(), by);
+        if (films.size() == 0) {
+            throw new NotFoundException(String.format("Фильмов по запросу %s не найдено", query));
+        }
         for (Film film : films) {
             film.setGenres(genreDbStorage.loadFilmGenre(film));
             film.setDirectors(directorDbStorage.loadFilmDirector(film));

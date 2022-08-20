@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Director;
-import ru.yandex.practicum.filmorate.service.film.director.DirectorService;
+import ru.yandex.practicum.filmorate.service.director.DirectorService;
 
 import java.sql.SQLException;
 import java.util.Collection;

@@ -1,7 +1,6 @@
-package ru.yandex.practicum.filmorate.storage.director;
+package ru.yandex.practicum.filmorate.storage.interf;
 
 import ru.yandex.practicum.filmorate.model.Director;
-import ru.yandex.practicum.filmorate.storage.Storage;
 
 public interface DirectorStorage extends Storage<Director> {
 }
