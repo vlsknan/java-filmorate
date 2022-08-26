@@ -39,7 +39,7 @@ class FilmDbStorageTest {
 
         filmDbStorage.create(film);
         // размер 2, т.к. в таблице films же есть фильм из GenreDbStorageTest
-        assertEquals(2, filmDbStorage.getAll().size());
+        assertEquals(1, filmDbStorage.getAll().size());
     }
 
     @Test
