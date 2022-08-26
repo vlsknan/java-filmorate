@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.dao.film;
+package ru.yandex.practicum.filmorate.storage.dao.director;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
+import ru.yandex.practicum.filmorate.storage.interf.DirectorStorage;
 
 import java.sql.*;
 import java.util.*;
