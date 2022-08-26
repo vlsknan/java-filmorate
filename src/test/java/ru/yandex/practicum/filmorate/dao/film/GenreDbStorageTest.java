@@ -6,7 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.yandex.practicum.filmorate.dao.film.GenreDbStorage;
+import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.storage.dao.film.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storage.dao.film.GenreDbStorage;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -14,9 +16,7 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -43,10 +43,11 @@ class GenreDbStorageTest {
     @Test
     void setAndLoadGenreTest() throws ValidationException {
         Set<Genre> genres = new HashSet<>();
+        List<Director> directorList = new ArrayList<>();
         genres.add(new Genre(1, "Комедия"));
         Film film1 = new Film(1, "test_user", "description",
                 LocalDate.of(2000, 05, 02), 30, new Mpa(1, "G"),
-                genres);
+                genres, directorList);
         filmDbStorage.create(film1);
 
         genreDbStorage.setFilmGenre(film1);

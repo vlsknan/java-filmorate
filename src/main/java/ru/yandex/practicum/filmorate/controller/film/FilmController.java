@@ -88,4 +88,9 @@ public class FilmController {
         log.info("GET list films director sortBy (year/likes)");
         return filmService.getListFilmsDirector(directorId, sortBy);
     }
+
+    @GetMapping("/films/search")
+    public List<Film> findPopularFilmsByTitleOrDirector(@RequestParam String query, @RequestParam String by)  {
+        return filmService.findPopularFilmsByTitleOrDirector(query, by);
+    }
  }

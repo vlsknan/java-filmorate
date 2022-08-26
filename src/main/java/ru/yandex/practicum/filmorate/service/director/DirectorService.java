@@ -1,18 +1,16 @@
-package ru.yandex.practicum.filmorate.service.film.director;
+package ru.yandex.practicum.filmorate.service.director;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dao.film.DirectorDbStorage;
+import ru.yandex.practicum.filmorate.storage.dao.director.DirectorDbStorage;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Director;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.GeneralService;
 
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor

@@ -1,14 +1,14 @@
-package ru.yandex.practicum.filmorate.dao.film;
+package ru.yandex.practicum.filmorate.storage.dao.film;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.interf.FilmStorage;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -169,6 +169,54 @@ public class FilmDbStorage implements FilmStorage {
                         "GROUP BY F.FILM_ID " +
                         "ORDER BY COUNT(L.USER_ID)";
                 films = jdbcTemplate.query(sql2, this::makeFilm, id);
+                break;
+        }
+        return films;
+    }
+
+    public List<Film> findPopularFilmsByTitleOrDirector(String query, String by) {
+        List<Film> films;
+        switch (by) {
+            case "title":
+                final String sql1 = "select F.FILM_ID, F.FILM_NAME, F.DESCRIPTION, " +
+                        "F.RELEASE_DATE, F.DURATION, M.MPA_ID, M.MPA_NAME, G.GENRE_ID " +
+                        "from FILMS F " +
+                        "           join MPA M on M.MPA_ID = F.MPA_ID " +
+                        "           left join FILMS_GENRES G on F.FILM_ID = G.FILM_ID " +
+                        "           left join LIKES L on F.FILM_ID = L.FILM_ID " +
+                        "where f.film_name like '" + query + "%' or f.film_name like '%" + query + "%' " +
+                        "or f.film_name like '%" + query + "' " +
+                        "group by f.film_id order by count(l.user_id) desc";
+                films = jdbcTemplate.query(sql1, this::makeFilm);
+                break;
+            case "director":
+                final String sql2 = "select F.FILM_ID, F.FILM_NAME, F.DESCRIPTION, " +
+                        "F.RELEASE_DATE, F.DURATION, M.MPA_ID, M.MPA_NAME, G.GENRE_ID, d.name " +
+                        "from FILMS F " +
+                        "           join MPA M on M.MPA_ID = F.MPA_ID " +
+                        "           left join FILMS_GENRES G on F.FILM_ID = G.FILM_ID " +
+                        "           left join LIKES L on F.FILM_ID = L.FILM_ID " +
+                        "           join films_directors fd on f.film_id = fd.film_id " +
+                        "           join directors d on d.director_id = fd.director_id " +
+                        "where d.name like '" + query + "%' or d.name like '%" + query + "%' " +
+                        "or d.name like '%" + query + "' " +
+                        "group by f.film_id order by count(l.user_id) desc";
+                films = jdbcTemplate.query(sql2, this::makeFilm);
+                break;
+            default:
+                final String sql3 = "select F.FILM_ID, F.FILM_NAME, F.DESCRIPTION, " +
+                        "F.RELEASE_DATE, F.DURATION, M.MPA_ID, M.MPA_NAME, G.GENRE_ID, d.name " +
+                        "from FILMS F " +
+                        "           join MPA M on M.MPA_ID = F.MPA_ID " +
+                        "           left join FILMS_GENRES G on F.FILM_ID = G.FILM_ID " +
+                        "           left join LIKES L on F.FILM_ID = L.FILM_ID " +
+                        "           join films_directors fd on f.film_id = fd.film_id " +
+                        "           join directors d on d.director_id = fd.director_id " +
+                        "where d.name like '" + query + "%' or d.name like '%" + query + "%' " +
+                        "or d.name like '%" + query + "' or f.film_name like '" + query + "%' " +
+                        "or f.film_name like '%" + query + "%' or f.film_name like '%" + query + "' " +
+                        "group by f.film_id order by count(l.user_id) desc ";
+                films = jdbcTemplate.query(sql3, this::makeFilm);
                 break;
         }
         return films;

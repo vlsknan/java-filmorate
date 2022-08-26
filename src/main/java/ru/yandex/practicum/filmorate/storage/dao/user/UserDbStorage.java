@@ -1,11 +1,11 @@
-package ru.yandex.practicum.filmorate.dao.user;
+package ru.yandex.practicum.filmorate.storage.dao.user;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.storage.interf.UserStorage;
 
 import java.sql.*;
 import java.sql.Date;
