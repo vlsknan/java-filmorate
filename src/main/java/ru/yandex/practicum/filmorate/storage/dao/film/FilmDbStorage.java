@@ -200,6 +200,14 @@ public class FilmDbStorage implements FilmStorage {
         return listByTitleAndDirectors;
     }
 
+    public List<Film> getCommonFilms(long userId, long friendId) {
+        String sql = "SELECT * " +
+                "FROM FILMS F, MPA M, LIKES L1, LIKES L2 " +
+                "WHERE F.FILM_ID = L1.FILM_ID AND F.FILM_ID = L2.FILM_ID AND L1.USER_ID = ? AND L2.USER_ID = ? " +
+                "AND M.MPA_ID = F.MPA_ID ";
+        return jdbcTemplate.query(sql, this::makeFilm, userId, friendId);
+    }
+
     private Film makeFilm(ResultSet rs, int rowNum) throws SQLException {
         return new Film(rs.getLong("FILM_ID"),
                 rs.getString("FILM_NAME"),
