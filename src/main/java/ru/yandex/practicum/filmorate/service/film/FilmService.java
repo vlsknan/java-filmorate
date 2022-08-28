@@ -17,6 +17,7 @@ import ru.yandex.practicum.filmorate.service.GeneralService;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -109,16 +110,40 @@ public class FilmService implements GeneralService<Film> {
         if (directorDbStorage.getById(id).isEmpty()) {
             throw new NotFoundException(String.format("Режиссер с id = %s не найден", id));
         }
-        List<Film> films = filmDbStorage.getListFilmsDirector(id, sort);
+        List<Film> films = null;
+        switch (sort) {
+            case "year":
+                films = filmDbStorage.getListFilmsDirectorByYear(id);
+                break;
+            case "likes":
+                films = filmDbStorage.getListFilmsDirectorByLikes(id);
+                break;
+        }
+        return addFilmsGenresAndDirectors(films);
+    }
+
+    //получить список фильмов по поиску по тексту и по режиссеру/названию фильма
+    public List<Film> getListFilmsByRequest(String query, String by) {
+        List<Film> films;
+        switch (by) {
+            case "title":
+                films = filmDbStorage.getListFilmsByRequestByTitle(query);
+                break;
+            case "director":
+                films = filmDbStorage.getListFilmsByRequestByDirector(query);
+                break;
+            default:
+                films = filmDbStorage.getListFilmsByRequestByTitleAndDirector(query);
+                break;
+        }
         return addFilmsGenresAndDirectors(films);
     }
 
     private List<Film> addFilmsGenresAndDirectors(List<Film> films) {
-        for (Film film : films) {
-            film.setGenres(genreDbStorage.loadFilmGenre(film));
-            film.setDirectors(directorDbStorage.loadFilmDirector(film));
-        }
-        return films;
+        return films.stream()
+                .peek(f -> f.setGenres(genreDbStorage.loadFilmGenre(f)))
+                .peek(f -> f.setDirectors(directorDbStorage.loadFilmDirector(f)))
+                .collect(Collectors.toList());
     }
 
     public void validate(Film film) throws ValidationException {
