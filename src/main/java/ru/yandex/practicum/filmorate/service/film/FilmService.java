@@ -122,7 +122,7 @@ public class FilmService implements GeneralService<Film> {
                 films = filmDbStorage.getListFilmsDirectorByLikes(id);
                 break;
         }
-        return setGenresAndDirectorsForFilms(films);
+        return films;
     }
 
     //получить список фильмов по поиску по тексту и по режиссеру/названию фильма
@@ -139,15 +139,9 @@ public class FilmService implements GeneralService<Film> {
                 films = filmDbStorage.getListFilmsByRequestByTitleAndDirector(query);
                 break;
         }
-        return setGenresAndDirectorsForFilms(films);
+        return films;
     }
 
-    private List<Film> setGenresAndDirectorsForFilms(List<Film> films) {
-        return films.stream()
-                .peek(f -> f.setGenres(genreDbStorage.loadFilmGenre(f)))
-                .peek(f -> f.setDirectors(directorDbStorage.loadFilmDirector(f)))
-                .collect(Collectors.toList());
-    }
 
     public void validate(Film film) throws ValidationException {
         if (film.getName() == null || film.getName().isBlank()) {
