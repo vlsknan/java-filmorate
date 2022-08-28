@@ -3,10 +3,10 @@ package ru.yandex.practicum.filmorate.service.film;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dao.film.DirectorDbStorage;
-import ru.yandex.practicum.filmorate.dao.film.FilmDbStorage;
-import ru.yandex.practicum.filmorate.dao.film.GenreDbStorage;
-import ru.yandex.practicum.filmorate.dao.LikeDbStorage;
+import ru.yandex.practicum.filmorate.storage.dao.director.DirectorDbStorage;
+import ru.yandex.practicum.filmorate.storage.dao.film.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storage.dao.film.GenreDbStorage;
+import ru.yandex.practicum.filmorate.storage.dao.LikeDbStorage;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Director;
@@ -32,14 +32,7 @@ public class FilmService implements GeneralService<Film> {
     @Override
     public Collection<Film> getAll() {
         List<Film> films = filmDbStorage.getAll();
-        for (Film film : films) {
-            Set<Genre> genre = genreDbStorage.loadFilmGenre(film);
-            film.setGenres(genre);
-
-            List<Director> directors = directorDbStorage.loadFilmDirector(film);
-            film.setDirectors(directors);
-        }
-        return films;
+        return addFilmsGenresAndDirectors(films);
     }
 
     //получить фильм по id
@@ -57,6 +50,7 @@ public class FilmService implements GeneralService<Film> {
     public Film create(Film film) throws ValidationException {
         validate(film);
         filmDbStorage.create(film);
+
         genreDbStorage.setFilmGenre(film);
         film.setGenres(genreDbStorage.loadFilmGenre(film));
         directorDbStorage.setFilmDirector(film);
@@ -97,13 +91,18 @@ public class FilmService implements GeneralService<Film> {
     }
 
     //получить список популярных фильмов (из первых count фильмов по количеству лайков)
-    public List<Film> getListPopularFilm(long count) {
-        List<Film> films =  filmDbStorage.getListPopularFilm(count);
-        for (Film film : films) {
-            Set<Genre> genre = genreDbStorage.loadFilmGenre(film);
-            film.setGenres(genre);
+    public List<Film> getListPopularFilm(int count, long genreId, int year) {
+        List<Film> films;
+        if (genreId != 0 && year != 0) {
+            films = filmDbStorage.findPopularFilmSortedByGenreAndYear(count, genreId, year);
+        } else if (genreId != 0 && year == 0) {
+            films = filmDbStorage.getListPopularFilmSortedByGenre(count, genreId);
+        } else if (genreId == 0 && year != 0) {
+            films = filmDbStorage.getListPopularFilmSortedByYear(count, year);
+        } else {
+            films = filmDbStorage.getListPopularFilm(count);
         }
-        return films;
+        return addFilmsGenresAndDirectors(films);
     }
 
     public List<Film> getListFilmsDirector(long id, String sort) throws SQLException {
@@ -111,6 +110,10 @@ public class FilmService implements GeneralService<Film> {
             throw new NotFoundException(String.format("Режиссер с id = %s не найден", id));
         }
         List<Film> films = filmDbStorage.getListFilmsDirector(id, sort);
+        return addFilmsGenresAndDirectors(films);
+    }
+
+    private List<Film> addFilmsGenresAndDirectors(List<Film> films) {
         for (Film film : films) {
             film.setGenres(genreDbStorage.loadFilmGenre(film));
             film.setDirectors(directorDbStorage.loadFilmDirector(film));
@@ -136,5 +139,4 @@ public class FilmService implements GeneralService<Film> {
             throw new ValidationException("Продолжительность фильма не может быть отрицательной.");
         }
     }
-
 }

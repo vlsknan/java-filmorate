@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.dao.user.UserDbStorage;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -38,9 +39,13 @@ class UserDbStorageTest {
     @Order(20)
     @Test
     void testGetById() throws SQLException {
+        User user = new User(1, "test321@email","test_login2321", "test_name",
+                LocalDate.of(2001,02,03));
+        userDbStorage.create(user);
+
         Optional<User> userOptional = userDbStorage.getById(1);
         Assertions.assertThat(userOptional).isPresent()
-                .hasValueSatisfying(user -> Assertions.assertThat(user)
+                .hasValueSatisfying(user1 -> Assertions.assertThat(user1)
                         .hasFieldOrPropertyWithValue("name", "test_name"));
     }
 
