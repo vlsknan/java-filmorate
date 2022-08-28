@@ -88,4 +88,11 @@ public class FilmController {
         log.info("GET list films director sortBy (year/likes)");
         return filmService.getListFilmsDirector(directorId, sortBy);
     }
+
+    //получить список фильмов по определенному запросу (query - текст поиска, by - где текст поиска)
+    @GetMapping("/search")
+    public List<Film> getListFilmsByRequest(@RequestParam String query, @RequestParam String by) {
+        log.info("GET list film by request by query-by");
+        return filmService.getListFilmsByRequest(query, by);
+    }
  }

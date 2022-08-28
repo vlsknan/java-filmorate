@@ -144,34 +144,60 @@ public class FilmDbStorage implements FilmStorage {
         return new ArrayList<>(films);
     }
 
+    public List<Film> getListFilmsDirectorByYear(long id) {
+        final String sql1 = "SELECT F.FILM_ID, F.FILM_NAME, F.DESCRIPTION, F.RELEASE_DATE, " +
+                "F.DURATION, M.MPA_ID, M.MPA_NAME, FD.DIRECTOR_ID " +
+                "FROM FILMS F " +
+                "JOIN MPA M ON F.MPA_ID = M.MPA_ID " +
+                "JOIN FILMS_DIRECTORS FD ON F.FILM_ID = FD.FILM_ID " +
+                "WHERE FD.DIRECTOR_ID = ? " +
+                "ORDER BY F.RELEASE_DATE";
+        return jdbcTemplate.query(sql1, this::makeFilm, id);
+    }
 
-    public List<Film> getListFilmsDirector(long id, String sort) {
-        List<Film> films = null;
-        switch (sort) {
-            case "year":
-                final String sql1 = "SELECT F.FILM_ID, F.FILM_NAME, F.DESCRIPTION, F.RELEASE_DATE, " +
-                        "F.DURATION, M.MPA_ID, M.MPA_NAME, FD.DIRECTOR_ID " +
-                        "FROM FILMS F " +
-                        "JOIN MPA M ON F.MPA_ID = M.MPA_ID " +
-                        "JOIN FILMS_DIRECTORS FD ON F.FILM_ID = FD.FILM_ID " +
-                        "WHERE FD.DIRECTOR_ID = ? " +
-                        "ORDER BY F.RELEASE_DATE";
-                films = jdbcTemplate.query(sql1, this::makeFilm, id);
-                break;
-            case "likes":
-                final String sql2 = "SELECT F.FILM_ID, F.FILM_NAME, F.DESCRIPTION, F.RELEASE_DATE, " +
-                        "F.DURATION, M.MPA_ID, M.MPA_NAME, FD.DIRECTOR_ID " +
-                        "FROM FILMS F " +
-                        "JOIN MPA M ON F.MPA_ID = M.MPA_ID " +
-                        "LEFT JOIN LIKES L ON F.FILM_ID = L.FILM_ID " +
-                        "JOIN FILMS_DIRECTORS FD ON F.FILM_ID = FD.FILM_ID " +
-                        "WHERE FD.DIRECTOR_ID = ? " +
-                        "GROUP BY F.FILM_ID " +
-                        "ORDER BY COUNT(L.USER_ID)";
-                films = jdbcTemplate.query(sql2, this::makeFilm, id);
-                break;
-        }
-        return films;
+    public List<Film> getListFilmsDirectorByLikes(long id) {
+        final String sql = "SELECT F.FILM_ID, F.FILM_NAME, F.DESCRIPTION, F.RELEASE_DATE, " +
+                "F.DURATION, M.MPA_ID, M.MPA_NAME, FD.DIRECTOR_ID " +
+                "FROM FILMS F " +
+                "JOIN MPA M ON F.MPA_ID = M.MPA_ID " +
+                "LEFT JOIN LIKES L ON F.FILM_ID = L.FILM_ID " +
+                "JOIN FILMS_DIRECTORS FD ON F.FILM_ID = FD.FILM_ID " +
+                "WHERE FD.DIRECTOR_ID = ? " +
+                "GROUP BY F.FILM_ID " +
+                "ORDER BY COUNT(L.USER_ID)";
+        return jdbcTemplate.query(sql, this::makeFilm, id);
+    }
+
+    public List<Film> getListFilmsByRequestByTitle(String query) {
+        final String sql = "SELECT F.FILM_ID, F.FILM_NAME, F.DESCRIPTION, F.RELEASE_DATE, " +
+                "F.DURATION, M.MPA_ID, M.MPA_NAME " +
+                "FROM FILMS F " +
+                "JOIN MPA M ON F.MPA_ID = M.MPA_ID " +
+                "LEFT JOIN LIKES L ON F.FILM_ID = L.FILM_ID " +
+                "WHERE LOWER(F.FILM_NAME) LIKE LOWER(?) " +
+                "GROUP BY F.FILM_ID " +
+                "ORDER BY COUNT(L.USER_ID)";
+        return jdbcTemplate.query(sql, this::makeFilm, "%" + query + "%");
+    }
+
+    public List<Film> getListFilmsByRequestByDirector(String query) {
+        final String sql = "SELECT F.FILM_ID, F.FILM_NAME, F.DESCRIPTION, F.RELEASE_DATE, " +
+                "F.DURATION, M.MPA_ID, M.MPA_NAME, FD.DIRECTOR_ID " +
+                "FROM FILMS F " +
+                "JOIN MPA M ON F.MPA_ID = M.MPA_ID " +
+                "LEFT JOIN LIKES L ON F.FILM_ID = L.FILM_ID " +
+                "JOIN FILMS_DIRECTORS FD ON F.FILM_ID = FD.FILM_ID " +
+                "JOIN DIRECTORS D ON D.DIRECTOR_ID = FD.DIRECTOR_ID " +
+                "WHERE LOWER(D.NAME) LIKE LOWER(?) " +
+                "GROUP BY F.FILM_ID " +
+                "ORDER BY COUNT(L.USER_ID)";
+        return jdbcTemplate.query(sql, this::makeFilm, "%" + query + "%");
+    }
+
+    public List<Film> getListFilmsByRequestByTitleAndDirector(String query) {
+        List<Film> listByTitleAndDirectors = getListFilmsByRequestByDirector(query);
+        listByTitleAndDirectors.addAll(getListFilmsByRequestByTitle(query));
+        return listByTitleAndDirectors;
     }
 
     private Film makeFilm(ResultSet rs, int rowNum) throws SQLException {
