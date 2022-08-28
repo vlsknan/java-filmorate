@@ -95,4 +95,11 @@ public class FilmController {
         log.info("GET list film by request by query-by");
         return filmService.getListFilmsByRequest(query, by);
     }
+
+    @GetMapping("/common")
+    public List<Film> findMutualFilms(@RequestParam long userId, @RequestParam long friendId) throws SQLException {
+        List<Film> films = filmService.getCommonFilms(userId, friendId);
+        log.info("Получен список общих фильмов пользователя: {} и пользователя: {}", userId, friendId);
+        return films;
+    }
  }

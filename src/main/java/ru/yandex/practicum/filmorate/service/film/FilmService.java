@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service.film;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.dao.director.DirectorDbStorage;
 import ru.yandex.practicum.filmorate.storage.dao.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.dao.film.GenreDbStorage;
@@ -13,6 +14,7 @@ import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.service.GeneralService;
+import ru.yandex.practicum.filmorate.storage.dao.user.UserDbStorage;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -24,6 +26,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FilmService implements GeneralService<Film> {
     private final FilmDbStorage filmDbStorage;
+    private final UserDbStorage userDbStorage;
     private final GenreDbStorage genreDbStorage;
     private final LikeDbStorage likeDbStorage;
     private final DirectorDbStorage directorDbStorage;
@@ -136,6 +139,15 @@ public class FilmService implements GeneralService<Film> {
                 films = filmDbStorage.getListFilmsByRequestByTitleAndDirector(query);
                 break;
         }
+        return addFilmsGenresAndDirectors(films);
+    }
+
+    public List<Film> getCommonFilms(long userId, long friendId) throws SQLException {
+        userDbStorage.getById(userId)
+                .orElseThrow(() -> new NotFoundException(String.format("Пользователь с id = %s не найден", userId)));
+        userDbStorage.getById(friendId)
+                .orElseThrow(() -> new NotFoundException(String.format("Пользователь с id = %s не найден", friendId)));
+        List<Film> films = filmDbStorage.getCommonFilms(userId, friendId);
         return addFilmsGenresAndDirectors(films);
     }
 
