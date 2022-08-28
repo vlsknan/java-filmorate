@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service.film;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 import ru.yandex.practicum.filmorate.dao.film.DirectorDbStorage;
 import ru.yandex.practicum.filmorate.dao.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.dao.film.GenreDbStorage;
@@ -17,6 +18,7 @@ import ru.yandex.practicum.filmorate.service.GeneralService;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -106,16 +108,45 @@ public class FilmService implements GeneralService<Film> {
         return films;
     }
 
+    //получить список фильмов определенного режиссера
     public List<Film> getListFilmsDirector(long id, String sort) throws SQLException {
         if (directorDbStorage.getById(id).isEmpty()) {
             throw new NotFoundException(String.format("Режиссер с id = %s не найден", id));
         }
-        List<Film> films = filmDbStorage.getListFilmsDirector(id, sort);
-        for (Film film : films) {
-            film.setGenres(genreDbStorage.loadFilmGenre(film));
-            film.setDirectors(directorDbStorage.loadFilmDirector(film));
+        List<Film> films = null;
+        switch (sort) {
+            case "year":
+                films = filmDbStorage.getListFilmsDirectorByYear(id);
+                break;
+            case "likes":
+                films = filmDbStorage.getListFilmsDirectorByLikes(id);
+                break;
         }
-        return films;
+        return setGenresAndDirectorsForFilms(films);
+    }
+
+    //получить список фильмов по поиску по тексту и по режиссеру/названию фильма
+    public List<Film> getListFilmsByRequest(String query, String by) {
+        List<Film> films;
+        switch (by) {
+            case "title":
+                films = filmDbStorage.getListFilmsByRequestByTitle(query);
+                break;
+            case "director":
+                films = filmDbStorage.getListFilmsByRequestByDirector(query);
+                break;
+            default:
+                films = filmDbStorage.getListFilmsByRequestByTitleAndDirector(query);
+                break;
+        }
+        return setGenresAndDirectorsForFilms(films);
+    }
+
+    private List<Film> setGenresAndDirectorsForFilms(List<Film> films) {
+        return films.stream()
+                .peek(f -> f.setGenres(genreDbStorage.loadFilmGenre(f)))
+                .peek(f -> f.setDirectors(directorDbStorage.loadFilmDirector(f)))
+                .collect(Collectors.toList());
     }
 
     public void validate(Film film) throws ValidationException {
