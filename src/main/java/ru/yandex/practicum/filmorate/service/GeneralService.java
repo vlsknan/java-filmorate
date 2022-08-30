@@ -12,5 +12,5 @@ public interface GeneralService<T> {
     T create(T t) throws ValidationException, SQLException;
     T update(T t) throws ValidationException, SQLException;
     void delete(long id) throws SQLException;
-    void validate(T t) throws ValidationException;
+    void validate(T t) throws ValidationException, SQLException;
 }

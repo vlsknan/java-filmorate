@@ -23,14 +23,14 @@ public class UserService implements GeneralService<User> {
 
     //создать пользователя
     @Override
-    public User create(User user) throws ValidationException {
+    public User create(User user) {
             validate(user);
             return userDbStorage.create(user);
     }
 
     //обновить данные пользователя
     @Override
-    public User update(User user) throws ValidationException, SQLException {
+    public User update(User user) throws SQLException {
         validate(user);
         Optional<User> res = userDbStorage.update(user);
         if (res.isPresent()) {
@@ -52,11 +52,8 @@ public class UserService implements GeneralService<User> {
     //получить пользователя по id
     @Override
     public User getById(long userId) throws SQLException {
-        Optional<User> resUser = userDbStorage.getById(userId);
-        if (resUser.isPresent()) {
-            return resUser.get();
-        }
-        throw new NotFoundException(String.format("Пользователь с id = %s не найден.", userId));
+        return userDbStorage.getById(userId).
+                orElseThrow(() -> new NotFoundException(String.format("Пользователь с id = %s не найден", userId)));
     }
 
     @Override
@@ -88,7 +85,7 @@ public class UserService implements GeneralService<User> {
         return friendDbStorage.getListCommonFriends(user1, user2);
     }
 
-    public void validate(User user) throws ValidationException {
+    public void validate(User user) {
         if (user.getEmail() == null || !user.getEmail().contains("@")) {
             log.debug("Адрес электронной почты пуст/не содержит @");
             throw new ValidationException("Проверьте адрес электронной почты.");
