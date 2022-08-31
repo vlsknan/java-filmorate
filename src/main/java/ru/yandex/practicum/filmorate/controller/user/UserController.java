@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.user.UserService;
@@ -53,6 +54,13 @@ public class UserController {
         return userService.getById(userId);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<HttpStatus>  deleteUserById(@PathVariable long id) {
+        log.info("DELETE user by id");
+        userService.delete(id);
+        return ResponseEntity.ok().build();
+    }
+
     //получить список друзей
     @GetMapping("/{id}/friends")
     public List<User> getListFriends(@PathVariable("id") long userId) throws SQLException {
@@ -90,5 +98,11 @@ public class UserController {
     public List<Event> getFeed(@PathVariable long userId) throws SQLException {
         log.info("GET list event user {}", userId);
         return userService.getFeed(userId);
+    }
+
+    @GetMapping("/{id}/recommendations")
+    public List<Film> getFilmRecommendations(@PathVariable long id) throws SQLException {
+        log.info("GET film recommendations");
+        return userService.getFilmRecommendations(id);
     }
 }
