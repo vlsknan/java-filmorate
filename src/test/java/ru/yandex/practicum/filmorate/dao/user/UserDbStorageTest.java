@@ -28,12 +28,15 @@ class UserDbStorageTest {
 
     @Order(10)
     @Test
-    void createAndGetAllUserTest() {
+    void createAndGetAllUserTest() throws SQLException {
         User user = new User(1, "test@email","test_login", "test_name",
                 LocalDate.of(2000,05,02));
-
         userDbStorage.create(user);
-        assertEquals(1, userDbStorage.getAll().size());
+
+        Optional<User> userOptional = userDbStorage.getById(1);
+        Assertions.assertThat(userOptional).isPresent()
+                .hasValueSatisfying(user1 -> Assertions.assertThat(user1)
+                        .hasFieldOrPropertyWithValue("name", "test_name"));
     }
 
     @Order(20)

@@ -49,9 +49,16 @@ public class FilmController {
 
     //обновить данные о фильме
     @PutMapping
-    public Film updateFilm(@RequestBody Film film) throws ValidationException, SQLException {
+    public Film updateFilm(@RequestBody Film film) throws SQLException {
         log.info("PUT update film");
         return filmService.update(film);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<HttpStatus> deleteFilmByID(@PathVariable long id) {
+        log.info("DELETE film by id");
+        filmService.delete(id);
+        return ResponseEntity.ok().build();
     }
 
     //поставить лайк фильму

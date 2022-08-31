@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.dao.EventDbStorage;
+import ru.yandex.practicum.filmorate.storage.dao.LikeDbStorage;
 import ru.yandex.practicum.filmorate.storage.dao.user.FriendDbStorage;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
@@ -23,6 +25,7 @@ public class UserService implements GeneralService<User> {
     private final UserStorage userDbStorage;
     private final FriendDbStorage friendDbStorage;
     private final EventDbStorage eventDbStorage;
+    private final LikeDbStorage likeDbStorage;
 
     //создать пользователя
     @Override
@@ -82,6 +85,7 @@ public class UserService implements GeneralService<User> {
 
     //получить список друзей пользователя user
     public List<User> getListFriends(long userId) throws SQLException {
+        getById(userId);
         return friendDbStorage. getListFriends(userId);
     }
 
@@ -93,6 +97,11 @@ public class UserService implements GeneralService<User> {
     public List<Event> getFeed(long userId) throws SQLException {
         getById(userId);
         return eventDbStorage.getFeed(userId);
+    }
+
+    public List<Film> getFilmRecommendations(long id) throws SQLException {
+        getById(id);
+        return likeDbStorage.getFilmRecommendations(id);
     }
 
     public void validate(User user) {
