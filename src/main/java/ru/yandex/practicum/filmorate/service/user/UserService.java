@@ -3,6 +3,8 @@ package ru.yandex.practicum.filmorate.service.user;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.storage.dao.EventDbStorage;
 import ru.yandex.practicum.filmorate.storage.dao.user.FriendDbStorage;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
@@ -20,6 +22,7 @@ import java.util.*;
 public class UserService implements GeneralService<User> {
     private final UserStorage userDbStorage;
     private final FriendDbStorage friendDbStorage;
+    private final EventDbStorage eventDbStorage;
 
     //создать пользователя
     @Override
@@ -65,6 +68,7 @@ public class UserService implements GeneralService<User> {
     public void addInFriend(long userId, long friendId) throws SQLException {
         try {
             friendDbStorage.addInFriend(userId, friendId);
+            eventDbStorage.addFriendEvent(userId, friendId);
         } catch (Exception ex) {
             throw new NotFoundException("Ошибка при добавлении друга");
         }
@@ -73,6 +77,7 @@ public class UserService implements GeneralService<User> {
     //удалить из друзей
     public void deleteFromFriends(long userId, long friendId) throws SQLException {
         friendDbStorage.deleteFromFriends(userId, friendId);
+        eventDbStorage.deleteFriendEvent(userId, friendId);
     }
 
     //получить список друзей пользователя user
@@ -83,6 +88,11 @@ public class UserService implements GeneralService<User> {
     //получить список общих друзей
     public List<User> getListCommonFriends(long user1, long user2) throws SQLException {
         return friendDbStorage.getListCommonFriends(user1, user2);
+    }
+
+    public List<Event> getFeed(long userId) throws SQLException {
+        getById(userId);
+        return eventDbStorage.getFeed(userId);
     }
 
     public void validate(User user) {

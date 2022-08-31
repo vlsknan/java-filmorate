@@ -3,16 +3,14 @@ package ru.yandex.practicum.filmorate.service.film;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.storage.dao.EventDbStorage;
 import ru.yandex.practicum.filmorate.storage.dao.director.DirectorDbStorage;
 import ru.yandex.practicum.filmorate.storage.dao.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.dao.film.GenreDbStorage;
 import ru.yandex.practicum.filmorate.storage.dao.LikeDbStorage;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.Director;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.service.GeneralService;
 import ru.yandex.practicum.filmorate.storage.dao.user.UserDbStorage;
 
@@ -30,13 +28,14 @@ public class FilmService implements GeneralService<Film> {
     private final GenreDbStorage genreDbStorage;
     private final LikeDbStorage likeDbStorage;
     private final DirectorDbStorage directorDbStorage;
+    private final EventDbStorage eventDbStorage;
     private static final LocalDate REFERENCE_DATE = LocalDate.of(1895,12,28);
 
     //получить список всех фильмов
     @Override
     public Collection<Film> getAll() {
         List<Film> films = filmDbStorage.getAll();
-        return addFilmsGenresAndDirectors(films);
+        return addFilmsGenresAndDirectorsForList(films);
     }
 
     //получить фильм по id
@@ -51,27 +50,26 @@ public class FilmService implements GeneralService<Film> {
 
     //создать фильм
     @Override
-    public Film create(Film film) throws ValidationException {
+    public Film create(Film film) {
         validate(film);
         filmDbStorage.create(film);
 
         genreDbStorage.setFilmGenre(film);
         film.setGenres(genreDbStorage.loadFilmGenre(film));
         directorDbStorage.setFilmDirector(film);
+
         return film;
     }
 
     //обновить данные о фильме
     @Override
-    public Film update(Film film) throws ValidationException, SQLException {
+    public Film update(Film film) throws SQLException {
         validate(film);
-        Optional<Film> res = filmDbStorage.update(film);
-        if (res.isPresent()) {
-            genreDbStorage.setFilmGenre(res.get());
-            directorDbStorage.setFilmDirector(res.get());
-            return res.get();
-        }
-        throw new NotFoundException(String.format("Фильм с id = %s не найден.", film.getId()));
+        Film res = filmDbStorage.update(film)
+                .orElseThrow(() -> new NotFoundException(String.format("Фильм с id = %s не найден.", film.getId())));
+        genreDbStorage.setFilmGenre(res);
+        directorDbStorage.setFilmDirector(res);
+        return res;
     }
 
     //удалить фильм по id
@@ -85,6 +83,7 @@ public class FilmService implements GeneralService<Film> {
         if (!likeDbStorage.addLike(filmId, userId)) {
             throw new NotFoundException("Ошибка при добавлении лайка.");
         }
+        eventDbStorage.addLikeEvent(filmId, userId);
     }
 
     //удалить у фильма лайк
@@ -92,6 +91,7 @@ public class FilmService implements GeneralService<Film> {
         if (!likeDbStorage.deleteLike(filmId, userId)) {
             throw new NotFoundException("Ошибка при удалении лайка.");
         }
+        eventDbStorage.deleteLikeEvent(filmId, userId);
     }
 
     //получить список популярных фильмов (из первых count фильмов по количеству лайков)
@@ -106,7 +106,7 @@ public class FilmService implements GeneralService<Film> {
         } else {
             films = filmDbStorage.getListPopularFilm(count);
         }
-        return addFilmsGenresAndDirectors(films);
+        return addFilmsGenresAndDirectorsForList(films);
     }
 
     public List<Film> getListFilmsDirector(long id, String sort) throws SQLException {
@@ -122,7 +122,7 @@ public class FilmService implements GeneralService<Film> {
                 films = filmDbStorage.getListFilmsDirectorByLikes(id);
                 break;
         }
-        return addFilmsGenresAndDirectors(films);
+        return addFilmsGenresAndDirectorsForList(films);
     }
 
     //получить список фильмов по поиску по тексту и по режиссеру/названию фильма
@@ -139,7 +139,7 @@ public class FilmService implements GeneralService<Film> {
                 films = filmDbStorage.getListFilmsByRequestByTitleAndDirector(query);
                 break;
         }
-        return addFilmsGenresAndDirectors(films);
+        return addFilmsGenresAndDirectorsForList(films);
     }
 
     public List<Film> getCommonFilms(long userId, long friendId) throws SQLException {
@@ -148,10 +148,10 @@ public class FilmService implements GeneralService<Film> {
         userDbStorage.getById(friendId)
                 .orElseThrow(() -> new NotFoundException(String.format("Пользователь с id = %s не найден", friendId)));
         List<Film> films = filmDbStorage.getCommonFilms(userId, friendId);
-        return addFilmsGenresAndDirectors(films);
+        return addFilmsGenresAndDirectorsForList(films);
     }
 
-    private List<Film> addFilmsGenresAndDirectors(List<Film> films) {
+    private List<Film> addFilmsGenresAndDirectorsForList(List<Film> films) {
         return films.stream()
                 .peek(f -> f.setGenres(genreDbStorage.loadFilmGenre(f)))
                 .peek(f -> f.setDirectors(directorDbStorage.loadFilmDirector(f)))
