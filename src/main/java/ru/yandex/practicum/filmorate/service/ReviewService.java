@@ -5,10 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ProblemLikesException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.service.film.FilmService;
 import ru.yandex.practicum.filmorate.service.user.UserService;
+import ru.yandex.practicum.filmorate.storage.dao.EventDbStorage;
 import ru.yandex.practicum.filmorate.storage.dao.ReviewDbStorage;
 
 import java.sql.SQLException;
@@ -23,7 +23,7 @@ public class ReviewService implements GeneralService<Review> {
     private final ReviewDbStorage reviewDbStorage;
     private final UserService userService;
     private final FilmService filmService;
-    //private final EventStorageDao eventStorageDao;
+    private final EventDbStorage eventDbStorage;
 
     @Override
     public Collection<Review> getAll() {
@@ -34,18 +34,20 @@ public class ReviewService implements GeneralService<Review> {
     public Review create(Review review) throws SQLException {
         userService.getById(review.getUserId());
         filmService.getById(review.getFilmId());
+
         Review createdReview = reviewDbStorage.create(review);
-        //eventStorageDao.addReviewEvent(createdReview);
+        eventDbStorage.addReviewEvent(createdReview);
         return createdReview;
     }
 
     @Override
     public Review update(Review review) throws SQLException {
+        getById(review.getReviewId());
         userService.getById(review.getUserId());
         filmService.getById(review.getFilmId());
-        getById(review.getReviewId());
+
         Review updatedReview = reviewDbStorage.update(review).get();
-        //eventStorageDao.updateReviewEvent(updatedReview);
+        eventDbStorage.updateReviewEvent(updatedReview);
         return updatedReview;
     }
 
@@ -53,7 +55,7 @@ public class ReviewService implements GeneralService<Review> {
     public void delete(long id) {
         Review deletedReview = getById(id);
         reviewDbStorage.delete(id);
-        //eventStorageDao.deleteReviewEvent(deletedReview);
+        eventDbStorage.deleteReviewEvent(deletedReview);
     }
 
     @Override
@@ -108,8 +110,5 @@ public class ReviewService implements GeneralService<Review> {
 
     @Override
     public void validate(Review review) {
-        if (!userService.getAll().contains(review.getUserId())) {
-            throw new ValidationException("id пользователя не существует");
-        }
     }
 }

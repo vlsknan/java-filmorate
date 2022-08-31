@@ -23,7 +23,7 @@ class FriendDbStorageTest {
 
     @Test
     void addGetDeleteFriendsTest() throws SQLException {
-        User user = new User(1, "test@email","test_login", "test_name",
+        User user = new User(1, "test678@email","test_login568", "test_name",
                 LocalDate.of(2000,05,02));
         User friend = new User(2, "email@email","login", "name",
                 LocalDate.of(1999,10,21));
