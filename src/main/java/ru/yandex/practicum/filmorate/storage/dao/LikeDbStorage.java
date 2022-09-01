@@ -4,10 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Like;
 import ru.yandex.practicum.filmorate.storage.dao.director.DirectorDbStorage;
 import ru.yandex.practicum.filmorate.storage.dao.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.dao.film.GenreDbStorage;
+import ru.yandex.practicum.filmorate.storage.dao.user.UserDbStorage;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +22,7 @@ public class LikeDbStorage {
     private final FilmDbStorage filmDbStorage;
     private final GenreDbStorage genreDbStorage;
     private final DirectorDbStorage directorDbStorage;
+    private final UserDbStorage userDbStorage;
 
     public boolean addLike(long filmId, long userId) {
         final String sqlQuery = "insert into LIKES (USER_ID, FILM_ID) " +
@@ -56,5 +60,19 @@ public class LikeDbStorage {
             recommendations.add(film);
         }
         return recommendations;
+    }
+
+
+    public List<Like> getLikes(long userId, long filmId) {
+        String sqlQuery = "SELECT L.USER_ID, L.FILM_ID " +
+                "FROM LIKES L " +
+                "WHERE L.USER_ID = ? AND L.FILM_ID = ? ";
+        return jdbcTemplate.query(sqlQuery, this::makeLike, userId, filmId);
+    }
+
+    private Like makeLike(ResultSet rs, int num) throws SQLException {
+        return new Like(
+                userDbStorage.getById(rs.getLong("USER_ID")).get(),
+                filmDbStorage.getById(rs.getLong("FILM_ID")).get());
     }
 }

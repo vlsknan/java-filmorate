@@ -7,13 +7,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.service.film.FilmService;
 
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/films")
@@ -98,15 +96,17 @@ public class FilmController {
 
     //получить список фильмов по определенному запросу (query - текст поиска, by - где текст поиска)
     @GetMapping("/search")
-    public List<Film> getListFilmsByRequest(@RequestParam String query, @RequestParam String by) {
+    public List<Film> getListFilmsByRequest(@RequestParam(required = false) String query,
+                                            @RequestParam(required = false) String by) {
         log.info("GET list film by request by query-by");
         return filmService.getListFilmsByRequest(query, by);
     }
 
+    //получить общие фильмы пользователей
     @GetMapping("/common")
-    public List<Film> findMutualFilms(@RequestParam long userId, @RequestParam long friendId) throws SQLException {
+    public List<Film> getCommonFilms(@RequestParam long userId, @RequestParam long friendId) throws SQLException {
         List<Film> films = filmService.getCommonFilms(userId, friendId);
-        log.info("Получен список общих фильмов пользователя: {} и пользователя: {}", userId, friendId);
+        log.info("GET list common users {} and {}", userId, friendId);
         return films;
     }
  }

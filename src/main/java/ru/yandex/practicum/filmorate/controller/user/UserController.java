@@ -8,12 +8,12 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.user.UserService;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
 
 @RestController
 @RequestMapping("/users")
@@ -94,12 +94,14 @@ public class UserController {
         return userService.getListCommonFriends(userId, otherId);
     }
 
+    //получить ленту событий
     @GetMapping("/{userId}/feed")
     public List<Event> getFeed(@PathVariable long userId) throws SQLException {
         log.info("GET list event user {}", userId);
         return userService.getFeed(userId);
     }
 
+    //получить список фильмов-рекоммендаций для пользователя
     @GetMapping("/{id}/recommendations")
     public List<Film> getFilmRecommendations(@PathVariable long id) throws SQLException {
         log.info("GET film recommendations");

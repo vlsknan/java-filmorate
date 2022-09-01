@@ -23,7 +23,7 @@ public class DirectorController {
         this.directorService = directorService;
     }
 
-    //Список всех режиссёров
+    //Получить список всех режиссёров
     @GetMapping
     public Collection<Director> getAll() throws SQLException {
         log.info("GET list directors all");

@@ -12,7 +12,7 @@ import ru.yandex.practicum.filmorate.storage.dao.user.UserDbStorage;
 import java.sql.SQLException;
 import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 @AutoConfigureTestDatabase

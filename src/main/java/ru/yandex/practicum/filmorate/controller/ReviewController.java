@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.service.ReviewService;
 
@@ -24,18 +23,21 @@ public class ReviewController {
         this.reviewService = reviewService;
     }
 
+    //создать отзыв
     @PostMapping
     public Review createReview(@Valid @RequestBody Review review) throws SQLException {
         log.info("POST create review");
         return reviewService.create(review);
     }
 
+    //обновить отзыв
     @PutMapping
     public Review updateReview(@Valid @RequestBody Review review) throws SQLException {
         log.info("PUT update review");
         return reviewService.update(review);
     }
 
+    //удалить отзыв
     @DeleteMapping("/{id}")
     public ResponseEntity<HttpStatus> deleteReview(@PathVariable long id) {
         log.info("DELETE delete review");
@@ -43,12 +45,14 @@ public class ReviewController {
         return ResponseEntity.ok().build();
     }
 
+    //получить отзыв по id
     @GetMapping("/{id}")
     public Review getReviewById(@PathVariable long id) {
         log.info("GET review by id");
         return reviewService.getById(id);
     }
 
+    //получить отзывы к фильму
     @GetMapping
     public List<Review> getReviewsByFilmIdOrAll(@RequestParam(required = false) Long filmId,
                                                 @RequestParam(defaultValue = "10") int count) throws SQLException {
@@ -56,6 +60,7 @@ public class ReviewController {
         return reviewService.getReviewsByFilmIdOrAll(filmId, count);
     }
 
+    //добавить лайк отзыву
     @PutMapping("/{id}/like/{userId}")
     public ResponseEntity<HttpStatus> addLikeToReview(@PathVariable long id,
                                                       @PathVariable long userId) throws SQLException {
@@ -64,6 +69,7 @@ public class ReviewController {
         return ResponseEntity.ok().build();
     }
 
+    //добавить дизлайк отзыву
     @PutMapping("/{id}/dislike/{userId}")
     public ResponseEntity<HttpStatus> addDislikeToReview(@PathVariable long id,
                                                          @PathVariable long userId) throws SQLException {
@@ -72,6 +78,7 @@ public class ReviewController {
         return ResponseEntity.ok().build();
     }
 
+    //удалить лайк у отзыва
     @DeleteMapping("/{id}/like/{userId}")
     public ResponseEntity<HttpStatus> deleteLikeToReview(@PathVariable long id,
                                                          @PathVariable long userId) throws SQLException {
@@ -80,6 +87,7 @@ public class ReviewController {
         return ResponseEntity.ok().build();
     }
 
+    //удалить дизлайк у отзыва
     @DeleteMapping("/{id}/dislike/{userId}")
     public ResponseEntity<HttpStatus> deleteDislikeToReview(@PathVariable long id,
                                                             @PathVariable long userId) throws SQLException {

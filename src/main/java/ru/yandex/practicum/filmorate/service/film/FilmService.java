@@ -3,20 +3,21 @@ package ru.yandex.practicum.filmorate.service.film;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.GeneralService;
+import ru.yandex.practicum.filmorate.service.user.UserService;
 import ru.yandex.practicum.filmorate.storage.dao.EventDbStorage;
+import ru.yandex.practicum.filmorate.storage.dao.LikeDbStorage;
 import ru.yandex.practicum.filmorate.storage.dao.director.DirectorDbStorage;
 import ru.yandex.practicum.filmorate.storage.dao.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.dao.film.GenreDbStorage;
-import ru.yandex.practicum.filmorate.storage.dao.LikeDbStorage;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.service.GeneralService;
-import ru.yandex.practicum.filmorate.storage.dao.user.UserDbStorage;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,7 +25,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FilmService implements GeneralService<Film> {
     private final FilmDbStorage filmDbStorage;
-    private final UserDbStorage userDbStorage;
+    private final UserService userService;
     private final GenreDbStorage genreDbStorage;
     private final LikeDbStorage likeDbStorage;
     private final DirectorDbStorage directorDbStorage;
@@ -79,11 +80,15 @@ public class FilmService implements GeneralService<Film> {
     }
 
     //добавить фильму лайк
-    public void addLike(long filmId, long userId) {
-        if (!likeDbStorage.addLike(filmId, userId)) {
-            throw new NotFoundException("Ошибка при добавлении лайка.");
-        }
+    public void addLike(long filmId, long userId) throws SQLException {
+        userService.getById(userId);
+        getById(filmId);
         eventDbStorage.addLikeEvent(filmId, userId);
+        if (likeDbStorage.getLikes(userId, filmId).size() == 0) {
+            if (!likeDbStorage.addLike(filmId, userId)) {
+                throw new NotFoundException("Ошибка при добавлении лайка.");
+            }
+        }
     }
 
     //удалить у фильма лайк
@@ -109,6 +114,7 @@ public class FilmService implements GeneralService<Film> {
         return addFilmsGenresAndDirectorsForList(films);
     }
 
+    //получить список фильмов режиссера отсортированных по году/лайкам
     public List<Film> getListFilmsDirector(long id, String sort) throws SQLException {
         if (directorDbStorage.getById(id).isEmpty()) {
             throw new NotFoundException(String.format("Режиссер с id = %s не найден", id));
@@ -142,15 +148,15 @@ public class FilmService implements GeneralService<Film> {
         return addFilmsGenresAndDirectorsForList(films);
     }
 
+    //получить список общих фильмов
     public List<Film> getCommonFilms(long userId, long friendId) throws SQLException {
-        userDbStorage.getById(userId)
-                .orElseThrow(() -> new NotFoundException(String.format("Пользователь с id = %s не найден", userId)));
-        userDbStorage.getById(friendId)
-                .orElseThrow(() -> new NotFoundException(String.format("Пользователь с id = %s не найден", friendId)));
+        userService.getById(userId);
+        userService.getById(friendId);
         List<Film> films = filmDbStorage.getCommonFilms(userId, friendId);
         return addFilmsGenresAndDirectorsForList(films);
     }
 
+    //загрузить списку фильмов жанры и режиссеров
     private List<Film> addFilmsGenresAndDirectorsForList(List<Film> films) {
         return films.stream()
                 .peek(f -> f.setGenres(genreDbStorage.loadFilmGenre(f)))
