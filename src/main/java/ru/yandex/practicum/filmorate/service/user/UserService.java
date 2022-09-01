@@ -3,16 +3,22 @@ package ru.yandex.practicum.filmorate.service.user;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dao.user.FriendDbStorage;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.GeneralService;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.storage.dao.EventDbStorage;
+import ru.yandex.practicum.filmorate.storage.dao.LikeDbStorage;
+import ru.yandex.practicum.filmorate.storage.dao.user.FriendDbStorage;
+import ru.yandex.practicum.filmorate.storage.interf.UserStorage;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -20,17 +26,19 @@ import java.util.*;
 public class UserService implements GeneralService<User> {
     private final UserStorage userDbStorage;
     private final FriendDbStorage friendDbStorage;
+    private final EventDbStorage eventDbStorage;
+    private final LikeDbStorage likeDbStorage;
 
     //создать пользователя
     @Override
-    public User create(User user) throws ValidationException {
+    public User create(User user) {
             validate(user);
             return userDbStorage.create(user);
     }
 
     //обновить данные пользователя
     @Override
-    public User update(User user) throws ValidationException, SQLException {
+    public User update(User user) throws SQLException {
         validate(user);
         Optional<User> res = userDbStorage.update(user);
         if (res.isPresent()) {
@@ -52,11 +60,8 @@ public class UserService implements GeneralService<User> {
     //получить пользователя по id
     @Override
     public User getById(long userId) throws SQLException {
-        Optional<User> resUser = userDbStorage.getById(userId);
-        if (resUser.isPresent()) {
-            return resUser.get();
-        }
-        throw new NotFoundException(String.format("Пользователь с id = %s не найден.", userId));
+        return userDbStorage.getById(userId).
+                orElseThrow(() -> new NotFoundException(String.format("Пользователь с id = %s не найден", userId)));
     }
 
     @Override
@@ -68,6 +73,7 @@ public class UserService implements GeneralService<User> {
     public void addInFriend(long userId, long friendId) throws SQLException {
         try {
             friendDbStorage.addInFriend(userId, friendId);
+            eventDbStorage.addFriendEvent(userId, friendId);
         } catch (Exception ex) {
             throw new NotFoundException("Ошибка при добавлении друга");
         }
@@ -76,10 +82,12 @@ public class UserService implements GeneralService<User> {
     //удалить из друзей
     public void deleteFromFriends(long userId, long friendId) throws SQLException {
         friendDbStorage.deleteFromFriends(userId, friendId);
+        eventDbStorage.deleteFriendEvent(userId, friendId);
     }
 
     //получить список друзей пользователя user
     public List<User> getListFriends(long userId) throws SQLException {
+        getById(userId);
         return friendDbStorage. getListFriends(userId);
     }
 
@@ -88,7 +96,17 @@ public class UserService implements GeneralService<User> {
         return friendDbStorage.getListCommonFriends(user1, user2);
     }
 
-    public void validate(User user) throws ValidationException {
+    public List<Event> getFeed(long userId) throws SQLException {
+        getById(userId);
+        return eventDbStorage.getFeed(userId);
+    }
+
+    public List<Film> getFilmRecommendations(long id) throws SQLException {
+        getById(id);
+        return likeDbStorage.getFilmRecommendations(id);
+    }
+
+    public void validate(User user) {
         if (user.getEmail() == null || !user.getEmail().contains("@")) {
             log.debug("Адрес электронной почты пуст/не содержит @");
             throw new ValidationException("Проверьте адрес электронной почты.");

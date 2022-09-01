@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.dao.user;
+package ru.yandex.practicum.filmorate.storage.dao.user;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -6,7 +6,7 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.List;
 
 @Component
 public class FriendDbStorage {

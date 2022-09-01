@@ -7,13 +7,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.service.film.FilmService;
 
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/films")
@@ -49,9 +47,16 @@ public class FilmController {
 
     //обновить данные о фильме
     @PutMapping
-    public Film updateFilm(@RequestBody Film film) throws ValidationException, SQLException {
+    public Film updateFilm(@RequestBody Film film) throws SQLException {
         log.info("PUT update film");
         return filmService.update(film);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<HttpStatus> deleteFilmByID(@PathVariable long id) {
+        log.info("DELETE film by id");
+        filmService.delete(id);
+        return ResponseEntity.ok().build();
     }
 
     //поставить лайк фильму
@@ -74,9 +79,11 @@ public class FilmController {
 
     //получить список из первых count фильмов по количеству лайков
     @GetMapping("/popular")
-    public Collection<Film> getListPopularFilm(@RequestParam(defaultValue = "10") int count) {
+    public Collection<Film> getListPopularFilm(@RequestParam(defaultValue = "10") int count,
+                                               @RequestParam(defaultValue = "0") long genreId,
+                                               @RequestParam(defaultValue = "0") int year) {
         log.info("GET list popular film(size = count)");
-        return filmService.getListPopularFilm(count);
+        return filmService.getListPopularFilm(count, genreId, year);
     }
 
     //список фильмов режиссера
@@ -85,5 +92,21 @@ public class FilmController {
                                            @RequestParam String sortBy) throws SQLException {
         log.info("GET list films director sortBy (year/likes)");
         return filmService.getListFilmsDirector(directorId, sortBy);
+    }
+
+    //получить список фильмов по определенному запросу (query - текст поиска, by - где текст поиска)
+    @GetMapping("/search")
+    public List<Film> getListFilmsByRequest(@RequestParam(required = false) String query,
+                                            @RequestParam(required = false) String by) {
+        log.info("GET list film by request by query-by");
+        return filmService.getListFilmsByRequest(query, by);
+    }
+
+    //получить общие фильмы пользователей
+    @GetMapping("/common")
+    public List<Film> getCommonFilms(@RequestParam long userId, @RequestParam long friendId) throws SQLException {
+        List<Film> films = filmService.getCommonFilms(userId, friendId);
+        log.info("GET list common users {} and {}", userId, friendId);
+        return films;
     }
  }
