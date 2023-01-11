@@ -52,6 +52,7 @@ public class FilmController {
         return filmService.update(film);
     }
 
+    //удалить фильм по id
     @DeleteMapping("/{id}")
     public ResponseEntity<HttpStatus> deleteFilmByID(@PathVariable long id) {
         log.info("DELETE film by id");

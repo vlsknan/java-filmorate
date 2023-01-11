@@ -1,9 +1,7 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -13,13 +11,14 @@ import java.util.Set;
 @AllArgsConstructor
 @RequiredArgsConstructor
 @EqualsAndHashCode(of = "id")
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Film {
-    private long id;
-    private String name;
-    private String description;
-    private LocalDate releaseDate;
-    private int duration;
-    private Mpa mpa;
-    private Set<Genre> genres;
-    private List<Director> directors;
+    long id;
+    String name;
+    String description;
+    LocalDate releaseDate;
+    int duration;
+    Mpa mpa;
+    Set<Genre> genres;
+    List<Director> directors;
 }
