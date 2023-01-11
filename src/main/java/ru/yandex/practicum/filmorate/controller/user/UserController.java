@@ -35,14 +35,14 @@ public class UserController {
 
     //создать пользователя
     @PostMapping
-    public User createUser(@RequestBody User user) throws ValidationException {
+    public User createUser(@RequestBody User user) {
         log.info("POST user");
         return userService.create(user);
     }
 
     //обновить данные пользователя
     @PutMapping
-    public User updateUser(@RequestBody User user) throws ValidationException, SQLException {
+    public User updateUser(@RequestBody User user) throws SQLException {
         log.info("PUT user");
         return userService.update(user);
     }
